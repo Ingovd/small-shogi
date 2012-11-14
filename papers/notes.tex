@@ -8,12 +8,14 @@
 
 \end{itemize}
 
-\section{PN^*-search for tsume-shogi}
+\section{PN-search and derivatives}
+PN-search is based on an AND/OR tree, basically using minimax to solve the game tree. It assigns proof numbers to nodes and expands nodes with low proof numbers first, i.e. nodes with high chance of proving a winning strategy.
 
+PN-search has the complete game tree generated so far in memory and this might pose a problem. PN*-search copes with this by storing proof numbers for certain nodes and re-expanding them later when their last known proof number seems promising.
 
+Ordering nodes is important, we want the easiest OR node proven first and the hardest AND node first. Ordering the nodes uses domain specific knowledge, in the papers the domain is tsume-shogi.
 
-\section{Proof-number search}
-Most-proving node first\\
-beetje lang.
+PDS is an extension of PN^*-search by also using disproof numbers in stead of only proof numbers.
+
 
 \end{document}
