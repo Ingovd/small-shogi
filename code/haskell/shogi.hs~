@@ -1,0 +1,16 @@
+module Shogi where
+
+import Data.Array
+
+class Node a where
+  children :: [a]
+  isTerminal :: Maybe Bool
+  
+type Config = [[Maybe (Piece)]]
+type Hand = [Role]
+type Board = ((Config,[Hand]), (Config, [Role]))
+
+data Role = K | G | S | N | L | P | B | R 
+data Piece = Un Role | Pr Role
+
+--instance Node

@@ -3,8 +3,10 @@
 
 \section{Interesting notions}
 \begin{itemize}
-\item PN-search or variation (PN*, PDN-PN)
-\item Transposition, domination, simulation (hash tables)
+\item PN-search or variation (PN*, PDN-PN, df-pn)
+\item Transposition, influences PN-search
+\item Graph history interaction (Solutions for PN-search exist)
+\item Domination, simulation (shogi specific)
 
 \end{itemize}
 
@@ -13,9 +15,11 @@ PN-search is based on an AND/OR tree, basically using minimax to solve the game 
 
 PN-search has the complete game tree generated so far in memory and this might pose a problem. PN*-search copes with this by storing proof numbers for certain nodes and re-expanding them later when their last known proof number seems promising.
 
-Ordering nodes is important, we want the easiest OR node proven first and the hardest AND node first. Ordering the nodes uses domain specific knowledge, in the papers the domain is tsume-shogi.
+Ordering nodes is important, we want the easiest OR node proven first and the hardest AND node first. Ordering the nodes uses domain specific knowledge.
 
 PDS is an extension of PN^*-search by also using disproof numbers in stead of only proof numbers.
+
+PDS-PN and df-pn extend PDS and both look promising. Their best first behaviour does not cope well with transpositions; the proof numbers count transpositions double which is undesirable.
 
 
 \end{document}
