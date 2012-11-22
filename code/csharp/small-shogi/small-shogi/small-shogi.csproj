@@ -36,10 +36,10 @@
   <ItemGroup>
     <Compile Include="Main.cs" />
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="boards\Board.cs" />
-    <Compile Include="boards\Board3x4.cs" />
     <Compile Include="pieces\Piece.cs" />
     <Compile Include="pieces\Move.cs" />
+    <Compile Include="boards\BitBoard.cs" />
+    <Compile Include="boards\BitBoard3x4.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
