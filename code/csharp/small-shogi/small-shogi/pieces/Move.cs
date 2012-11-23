@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 
 namespace smallshogi
 {
@@ -9,11 +10,10 @@ namespace smallshogi
 		{
 		}
 
-		public BitBoard move (BitBoard b)
+		public BitArray move (BitArray[] b)
 		{
-			return b;
+			return b[0];
 		}
-
 	}
 }
 

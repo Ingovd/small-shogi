@@ -38,12 +38,10 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="pieces\Piece.cs" />
     <Compile Include="pieces\Move.cs" />
-    <Compile Include="boards\BitBoard.cs" />
-    <Compile Include="boards\BitBoard3x4.cs" />
+    <Compile Include="Game.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
-    <Folder Include="boards\" />
     <Folder Include="pieces\" />
   </ItemGroup>
 </Project>
