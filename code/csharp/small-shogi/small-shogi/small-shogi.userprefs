@@ -1,0 +1,15 @@
+﻿<Properties>
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="boards/BitBoard3x4.cs">
+    <Files>
+      <File FileName="pieces/Move.cs" Line="14" Column="13" />
+      <File FileName="pieces/Piece.cs" Line="1" Column="1" />
+      <File FileName="boards/BitBoard3x4.cs" Line="9" Column="9" />
+      <File FileName="boards/BitBoard.cs" Line="6" Column="32" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore />
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
