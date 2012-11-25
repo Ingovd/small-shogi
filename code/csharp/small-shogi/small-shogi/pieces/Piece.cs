@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace smallshogi
@@ -17,19 +18,42 @@ namespace smallshogi
 
 		public Type type;
 		public Type ptype;
-		public bool isRanged;
+
+		private bool ranged;
+        private bool pranged;
 
 		public Piece (bool isRanged, List<Move> moves, Type type,
-		              List<Move> pmoves, Type ptype = Type.None)
+		              List<Move> pmoves = null, Type ptype = Type.None)
 		{
 			this.moves = moves;
-			this.isRanged = isRanged;
 			this.type = type;
 			this.pmoves = pmoves;
 			this.ptype = ptype;
+
+            foreach (Move m in moves)
+                ranged = ranged || m.isRanged;
+            if (pmoves == null)
+                pmoves = new List<Move>();
+            foreach (Move m in pmoves)
+                pranged = pranged || m.isRanged;
 		}
 
-		//public List<BitArray>
+        public bool isRanged(bool b)
+        {
+            return (!b && ranged) || (b && pranged);
+        }
+
+        public Dictionary<BitArray, BitArray> generateMoves(int files, int columns)
+        {
+            var dic = new Dictionary<BitArray, BitArray>();
+            for (int i = 0; i < files; ++i)
+                for (int j = 0; j < columns; ++j)
+                {
+                    var pos = new BitArray(files * columns);
+
+                }
+            return dic;
+        }
 	}
 }
 

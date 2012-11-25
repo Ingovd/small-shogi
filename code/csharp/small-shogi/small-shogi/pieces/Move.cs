@@ -5,14 +5,13 @@ namespace smallshogi
 {
 	public class Move
 	{
-		int fileOff, columnOff;
-		public Move ()
-		{
-		}
+		public int f, c;
+        public bool isRanged;
 
-		public BitArray move (BitArray[] b)
+		public Move (int f, int c)
 		{
-			return b[0];
+            this.f = f;
+            this.c = c;
 		}
 	}
 }
