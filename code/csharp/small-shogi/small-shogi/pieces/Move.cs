@@ -5,13 +5,14 @@ namespace smallshogi
 {
 	public class Move
 	{
-		public int f, c;
+		public int c, f;
         public bool isRanged;
 
-		public Move (int f, int c)
+		public Move (int c, int f, bool isRanged = false)
 		{
+			this.c = c;
             this.f = f;
-            this.c = c;
+			this.isRanged = isRanged;
 		}
 	}
 }

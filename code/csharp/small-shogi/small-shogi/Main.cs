@@ -8,36 +8,52 @@ namespace smallshogi
 	{
 		public static void Main (string[] args)
 		{
-			Func<string, string> prependMoreShit = x => "shit" + x;
+			Console.WriteLine ("Hello World!");
 
-			Console.WriteLine (prependMoreShit(prependShit("Hello World!")));
+			var ul = new Move(-1, -1);
+			var u  = new Move( 0, -1);
+			var ur = new Move( 1, -1);
+			var l  = new Move(-1,  0);
+			var r  = new Move( 1,  0);
+			var dl = new Move(-1,  1);
+			var d  = new Move( 0,  1);
+			var dr = new Move( 1,  1);
+			Move[] kingArray = {ul, u, ur, l, r, dl, d, dr};
+			Move[] bishopArray = {ul, ur, dl, dr};
+			Move[] rookArray = {u, l, r, d};
+			var kingMoves   = new List<Move>(kingArray);
+			var bishopMoves = new List<Move>(bishopArray);
+			var rookMoves   = new List<Move>(rookArray);
 
-            Piece king = new Piece(false, new List<Move>(), Type.King);
-            Piece[] pieces = { king };
+            var king   = new Piece(kingMoves, Type.King);
+			var bishop = new Piece(bishopMoves, Type.Bishop);
+			var rook   = new Piece(rookMoves, Type.Rook);
+            Piece[] pieces = { king, bishop, rook };
 
-            Game g = new Game(null, 4, 3, pieces);
+			var white = new Dictionary<int, Type>();
+			var black = new Dictionary<int, Type>();
+			white[ 0] = Type.Bishop;
+			white[ 1] = Type.King;
+			white[ 2] = Type.Rook;
+			black[ 9] = Type.Rook;
+			black[10] = Type.King;
+			black[11] = Type.Bishop;
 
-            int[] ints = { 17875465 };
-            var bit = new BitArray(ints);
-            var bit2 = new BitArray(32, true);
-            bit = bit.And(bit2);
 
-            DisplayBitArray(bit);
-            foreach (BitArray b in g.allOnes(bit))
-                DisplayBitArray(b);
+            Game g = new Game(white, black, 4, 3, pieces);
+
+            foreach (var b in g.children (g.startingPos, 0))
+				DisplayBitArray(b);
 
             Console.Read();
-		}
-
-		public static string prependShit (string s)
-		{
-			return "shit" + s;
 		}
 
         static void DisplayBitArray(BitArray bitArray)
         {
             for (int i = 0; i < bitArray.Count; i++)
             {
+				if(i % 3 == 0 && i != 0)
+					Console.WriteLine();
                 bool bit = bitArray.Get(i);
                 Console.Write(bit ? 1 : 0);
             }
