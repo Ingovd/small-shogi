@@ -11,6 +11,7 @@ namespace smallshogi
 		int files, columns; // Size of game board
 		Piece[] pieces; // A list of pieces used for move generation
 		Dictionary<Type, int> index; // Map from piece type to its index in Board/BitBoard[]
+		int l;
 
 		public Game (Dictionary<int, Type> white, Dictionary<int, Type> black,
 		             int files, int columns, Piece[] pieces)
@@ -48,6 +49,8 @@ namespace smallshogi
 				startingPos [index [b.Value] + index.Count].Set (b.Key);
 			}
 
+			l = index.Count;
+
 			// Debug output
 //			for (int i = 0; i < startingPos.Length; ++i) {
 //				Console.WriteLine ("Position " + i);
@@ -72,41 +75,35 @@ namespace smallshogi
 		{
 			var children = new List<BitBoard> ();
 
-			// Do moves of player c (0=white, 1=black)
-			children.AddRange (moves (position, c));
+			// Do moves of player c (0=white, 1=black) for each piece p
+			for (int p = 0; p < index.Count; ++p) {
+				var singleMoves = moves (position, p, c);
+				children.AddRange (singleMoves);
+			}
+
 			return children;
 		}
 
-		public List<BitBoard> moves (BitBoard[] position, int c)
+		public List<BitBoard> moves (BitBoard[] position, int p, int c)
 		{
-			var moves = new List<BitBoard> ();
-			var l = index.Count;
-
 			BitBoard possibleMoves;
-			for (int i = 0; i < index.Count; ++i) {
-				if (!pieces [i].isRanged (false)) {
-					System.Console.WriteLine("Trying to access moveset" + i);
-					var a = position[i + c * l];
-					var b = a.LSBitBoard();
-					var d = moveSets[i];
-					var e = d[b];
-                    possibleMoves = moveSets[i] // Get the dictionary for the correct piece type
-                        [position[i + c * l]]; // Get the correct attacked squares for the position of piece i
-				} else
-					possibleMoves = new BitBoard (0);// Do some shit for ranged pieces
+			if (pieces [p].isRanged (p < l)) {
+                possibleMoves = moveSets[p] // Get the dictionary for the correct piece type
+                    [position[p + c * l]]; // Get the correct attacked squares for the position of piece i
+			} else
+				possibleMoves = new BitBoard (0);// Do some shit for ranged pieces
 
-				// Eliminate squares occupied by the same colour
-				possibleMoves.And (colourPieces (position, c).Not ());
-				moves.AddRange (possibleMoves.allOnes ());
-			}
-			return moves;
+			// Eliminate squares occupied by the same colour
+			possibleMoves.And (colourPieces (position, c).Not ());
+
+			return possibleMoves.allOnes ();
 		}
 
 		public BitBoard colourPieces (BitBoard[] position, int c)
 		{
 			BitBoard allPieces = new BitBoard ();
-			for (int i = 0; i < index.Count; ++i)
-				allPieces.Or (position [i + c * index.Count]);
+			for (int i = 0; i < l; ++i)
+				allPieces.Or (position [i + c * l]);
 			return allPieces;
 		}
 
