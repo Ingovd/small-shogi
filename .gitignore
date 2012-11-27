@@ -6,7 +6,8 @@
 # *~
 *.exe
 code/csharp/small-shogi/small-shogi/bin/Debug*
-code/csharp/small-shogi/small-shogi/obj*
+code/csharp/small-shogi/small-shogi/obj*.
+bin/
 *.suo
 *.db
 
