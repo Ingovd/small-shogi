@@ -1,10 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="pieces/Move.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Game.cs">
     <Files>
       <File FileName="pieces/Move.cs" Line="15" Column="15" />
-      <File FileName="pieces/Piece.cs" Line="15" Column="29" />
-      <File FileName="Main.cs" Line="18" Column="4" />
+      <File FileName="pieces/Piece.cs" Line="75" Column="15" />
+      <File FileName="Main.cs" Line="43" Column="43" />
+      <File FileName="Game.cs" Line="81" Column="60" />
+      <File FileName="Board.cs" Line="12" Column="4" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

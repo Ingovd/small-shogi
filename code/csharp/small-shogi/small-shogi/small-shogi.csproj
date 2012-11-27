@@ -41,6 +41,7 @@
     <Compile Include="Game.cs" />
     <Compile Include="Ply.cs" />
     <Compile Include="Board.cs" />
+    <Compile Include="BitBoard.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>

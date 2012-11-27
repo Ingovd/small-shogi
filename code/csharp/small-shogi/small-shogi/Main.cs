@@ -39,22 +39,21 @@ namespace smallshogi
 			black[10] = Type.King;
 			black[11] = Type.Bishop;
 
-
             Game g = new Game(white, black, 4, 3, pieces);
 
             foreach (var b in g.children (g.startingPos, 0))
-				DisplayBitArray(b);
+				Console.WriteLine(b.toString(3, 12));
 
             Console.Read();
 		}
 
-        static void DisplayBitArray(BitArray bitArray)
+        static void DisplayBitBoard(BitBoard BitBoard)
         {
-            for (int i = 0; i < bitArray.Count; i++)
+            for (int i = 0; i < 32; i++)
             {
 				if(i % 3 == 0 && i != 0)
 					Console.WriteLine();
-                bool bit = bitArray.Get(i);
+                bool bit = BitBoard.Get(i);
                 Console.Write(bit ? 1 : 0);
             }
             Console.WriteLine();

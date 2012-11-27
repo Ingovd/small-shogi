@@ -5,7 +5,7 @@ namespace smallshogi
 {
 	public class Board
 	{
-		BitArray[] bitboards;
+		BitBoard[] bitboards;
 
 		public Board ()
 		{

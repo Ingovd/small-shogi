@@ -41,12 +41,13 @@ namespace smallshogi
 			this.pmoves = pmoves;
 			this.ptype = ptype;
 
+			// Flag if this piece has ranged moves
 			foreach (Move m in moves)
 				ranged = ranged || m.isRanged;
-			if (pmoves == null)
-				pmoves = new List<Move> ();
-			foreach (Move m in pmoves)
-				pranged = pranged || m.isRanged;
+			// Flag if this piece has ranged moves after promoption
+			if (pmoves != null)
+				foreach (Move m in pmoves)
+					pranged = pranged || m.isRanged;
 		}
 
 		public bool isRanged (bool b)
@@ -54,24 +55,28 @@ namespace smallshogi
 			return (!b && ranged) || (b && pranged);
 		}
 
-		public Dictionary<int, BitArray> generateMoves (int files, int columns, bool p)
+		public Dictionary<BitBoard, BitBoard> generateMoves (int files, int columns, bool p)
 		{
-			var dic = new Dictionary<int, BitArray> ();
+			var dic = new Dictionary<BitBoard, BitBoard> ();
 			List<Move> selectedMoves = p ? pmoves : moves;
+			if(selectedMoves == null)
+				return null;
 
 			for (int j = 0; j < files; ++j)
 				for (int i = 0; i < columns; ++i) {
-					var moveBoard = new BitArray (columns * files);
+				var position = new BitBoard ();
+				position.Set (i + j * columns);
+					var moveBoard = new BitBoard ();
 					foreach (Move m in selectedMoves) {
 						if (i + m.c < columns &&
 							i + m.c >= 0 &&
 							j + m.f < files &&
 							j + m.f >= 0)
-							moveBoard.Set (i + m.c + (j + m.f) * columns, true);
+							moveBoard.Set (i + m.c + (j + m.f) * columns);
 					}
-					dic.Add (i + j * columns, moveBoard);
+					dic.Add (position, moveBoard);
 				}
-			dic.Add (files*columns, new BitArray(files*columns, false));
+			dic.Add (new BitBoard(), new BitBoard());
 			return dic;
 		}
 	}

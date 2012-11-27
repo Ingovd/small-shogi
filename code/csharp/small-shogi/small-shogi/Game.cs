@@ -6,15 +6,15 @@ namespace smallshogi
 {
 	public class Game
 	{
-		public BitArray[] startingPos; // Initial setup
-		public Dictionary<int, Dictionary<int, BitArray>> moveSets; // Attack boards for pieces
+		public BitBoard[] startingPos; // Initial setup
+		public Dictionary<int, Dictionary<BitBoard, BitBoard>> moveSets; // Attack boards for pieces
 		int files, columns; // Size of game board
-		Piece[] pieces; // A list of pieces used for move generation 
+		Piece[] pieces; // A list of pieces used for move generation
+		Dictionary<Type, int> index; // Map from piece type to its index in Board/BitBoard[]
 
 		public Game (Dictionary<int, Type> white, Dictionary<int, Type> black,
 		             int files, int columns, Piece[] pieces)
 		{
-			this.startingPos = startingPos;
 			this.files = files;
 			this.columns = columns;
 			this.pieces = pieces;
@@ -26,89 +26,112 @@ namespace smallshogi
 
 		private void generateInitialSetup (Dictionary<int, Type> white, Dictionary<int, Type> black)
 		{
+			index = new Dictionary<Type, int> ();
 
+			int promotedPieces = 0;
+			for (int i = 0; i < pieces.Length; ++i) {
+				index.Add (pieces [i].type, i);
+				if (pieces [i].ptype != Type.None) {
+					index [pieces [i].ptype] = pieces.Length + promotedPieces;
+					promotedPieces++;
+				}
+			}
+
+			startingPos = new BitBoard[index.Count * 2];
+			for (int i = 0; i < index.Count * 2; ++i)
+				startingPos [i] = new BitBoard ();
+
+			foreach (KeyValuePair<int, Type> w in white) {
+				startingPos [index [w.Value]].Set (w.Key);
+			}
+			foreach (KeyValuePair<int, Type> b in black) {
+				startingPos [index [b.Value] + index.Count].Set (b.Key);
+			}
+
+			// Debug output
+//			for (int i = 0; i < startingPos.Length; ++i) {
+//				Console.WriteLine ("Position " + i);
+//				Console.WriteLine (startingPos[i].toString (3));
+//			}
 		}
 
 		private void generateMoveSets ()
 		{
-			moveSets = new Dictionary<int, Dictionary<int, BitArray>> ();
-			for (int i = 0; i < pieces.Length; ++i) {
-				moveSets.Add (i, pieces [i].generateMoves (files, columns, false));
-				moveSets.Add (i + pieces.Length, pieces [i].generateMoves (files, columns, false));
+			moveSets = new Dictionary<int, Dictionary<BitBoard, BitBoard>> ();
+			var l = pieces.Length;
+			for (int i = 0; i < l; ++i) {
+				var p = pieces[i];
+				moveSets.Add (index[p.type ] , p.generateMoves (files, columns, false));
+				if(p.ptype != Type.None)
+					moveSets.Add (index[p.ptype] , p.generateMoves (files, columns, true ));
 			}
 		}
 
-		// Returns a BitArray for every legal move including captures, excluding promotion
-		public List<BitArray> children (BitArray[] position, int c)
+		// Returns a BitBoard for every legal move including captures, excluding promotion
+		public List<BitBoard> children (BitBoard[] position, int c)
 		{
-            var children = new List<BitArray>();
+			var children = new List<BitBoard> ();
 
-            // Do moves of player c (0=white, 1=black)
-            children.AddRange(moves(position, c)); // Unpromoted pieces
-            children.AddRange(moves(position, c)); // Promoted pieces
+			// Do moves of player c (0=white, 1=black)
+			children.AddRange (moves (position, c));
 			return children;
 		}
 
-        public List<BitArray> moves(BitArray[] position, int c)
-        {
-            var moves = new List<BitArray>();
-            var l = pieces.Length;
+		public List<BitBoard> moves (BitBoard[] position, int c)
+		{
+			var moves = new List<BitBoard> ();
+			var l = index.Count;
 
-            BitArray possibleMoves;
-            for (int i = 0; i < pieces.Length; ++i)
-            {
-                if (!pieces[i].isRanged(false)) {
-//					System.Console.WriteLine("Trying to access moveset" + (i+p*l));
-//					var a = position[i + c * l + 2 * p * l];
-//					var b = firstSet (a);
-//					var d = moveSets[i+p*l];
-//					var e = d[b];
-//                    possibleMoves = moveSets[i + p * l] // Get the dictionary for the correct piece type
-//                        [firstSet(position[i + c * l + 2 * p * l])];           // Get the correct attacked squares for the position of piece i
-				}
-				else
-                    possibleMoves = new BitArray(0);// Do some shit for ranged pieces
+			BitBoard possibleMoves;
+			for (int i = 0; i < index.Count; ++i) {
+				if (!pieces [i].isRanged (false)) {
+					System.Console.WriteLine("Trying to access moveset" + i);
+					var a = position[i + c * l];
+					var b = a.LSBitBoard();
+					var d = moveSets[i];
+					var e = d[b];
+                    possibleMoves = moveSets[i] // Get the dictionary for the correct piece type
+                        [position[i + c * l]]; // Get the correct attacked squares for the position of piece i
+				} else
+					possibleMoves = new BitBoard (0);// Do some shit for ranged pieces
 
-                // Eliminate squares occupied by the same colour
-                possibleMoves = possibleMoves.And(colourPieces(position, c).Not());
-                moves.AddRange(allOnes(possibleMoves));
-            }
-            return moves;
-        }
+				// Eliminate squares occupied by the same colour
+				possibleMoves.And (colourPieces (position, c).Not ());
+				moves.AddRange (possibleMoves.allOnes ());
+			}
+			return moves;
+		}
 
-        public BitArray colourPieces(BitArray[] position, int c)
-        {
-            BitArray allPieces = new BitArray(position[0]);
-            for (int i = 1; i < pieces.Length; ++i)
-                allPieces.Or(position[i + c * pieces.Length]);
-            return allPieces;
-        }
-
-        public static List<BitArray> allOnes(BitArray bits)
-        {
-            var result = new List<BitArray>();
-            for (int i = 0; i < bits.Length; ++i)
-                if (bits[i])
-                {
-                    var bit = new BitArray(bits.Length);
-                    bit.Set(i, true);
-                    result.Add(bit);
-                }
-            return result;
-        }
-
-		public static int firstSet(BitArray bits)
-        {
-            for (int i = 0; i < bits.Length; ++i)
-                if (bits[i])
-					return i;
-			return bits.Length;
-        }
+		public BitBoard colourPieces (BitBoard[] position, int c)
+		{
+			BitBoard allPieces = new BitBoard ();
+			for (int i = 0; i < index.Count; ++i)
+				allPieces.Or (position [i + c * index.Count]);
+			return allPieces;
+		}
 
 		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, win, lose
-		public int gamePosition (BitArray[] position)
+		public int gamePosition (BitBoard[] position)
 		{
 			return -1;
+		}
+	}
+
+
+	// Maybe later
+	public struct Square
+	{
+		int file, column;
+
+		public Square (int file, int column)
+		{
+			this.file = file;
+			this.column = column;
+		}
+
+		public override int GetHashCode ()
+		{
+			return file << 16 + column;
 		}
 	}
 }
