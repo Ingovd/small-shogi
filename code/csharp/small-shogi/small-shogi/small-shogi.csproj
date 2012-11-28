@@ -39,12 +39,15 @@
     <Compile Include="pieces\Piece.cs" />
     <Compile Include="pieces\Move.cs" />
     <Compile Include="Game.cs" />
-    <Compile Include="Ply.cs" />
     <Compile Include="Board.cs" />
     <Compile Include="BitBoard.cs" />
+    <Compile Include="ply\IPly.cs" />
+    <Compile Include="ply\MovePly.cs" />
+    <Compile Include="ply\DropPly.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Folder Include="pieces\" />
+    <Folder Include="ply\" />
   </ItemGroup>
 </Project>

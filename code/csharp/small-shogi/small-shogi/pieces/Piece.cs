@@ -50,6 +50,7 @@ namespace smallshogi
 					pranged = pranged || m.isRanged;
 		}
 
+		// Check if this piece is ranged if it is (false) unpromoted or (true) promoted
 		public bool isRanged (bool b)
 		{
 			return (!b && ranged) || (b && pranged);
