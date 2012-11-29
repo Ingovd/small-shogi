@@ -3,11 +3,13 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="Game.cs">
     <Files>
       <File FileName="pieces/Move.cs" Line="15" Column="15" />
-      <File FileName="pieces/Piece.cs" Line="63" Column="17" />
+      <File FileName="pieces/Piece.cs" Line="53" Column="72" />
       <File FileName="Main.cs" Line="45" Column="42" />
-      <File FileName="Game.cs" Line="80" Column="46" />
+      <File FileName="Game.cs" Line="145" Column="4" />
       <File FileName="Board.cs" Line="14" Column="2" />
-      <File FileName="BitBoard.cs" Line="117" Column="4" />
+      <File FileName="BitBoard.cs" Line="65" Column="4" />
+      <File FileName="ply/MovePly.cs" Line="36" Column="4" />
+      <File FileName="ply/DropPly.cs" Line="11" Column="30" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

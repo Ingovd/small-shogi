@@ -58,16 +58,22 @@ namespace smallshogi
 
 		public BitBoard PushMasked (BitBoard mask)
 		{
+			// Get masked value
 			var masked = new BitBoard(bits & mask.bits);
+			// Remove it
 			bits ^= masked.bits;
+			// Add pushed masked value (disregarding overflow, easily added by masking again)
 			bits |= (masked.bits << 1) | mask.LSBitBoard().bits;
 			return this;
 		}
 
 		public BitBoard PopMasked (BitBoard mask)
 		{
+			// Get masked value
 			var masked = new BitBoard(bits & mask.bits);
+			// Remove it
 			bits ^= masked.bits;
+			// Add popped masked value
 			bits |= mask.LSBitBoard ().Not ().And(masked).bits >> 1;
 			return this;
 		}

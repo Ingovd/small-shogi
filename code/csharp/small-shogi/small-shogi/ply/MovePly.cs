@@ -2,10 +2,8 @@ using System;
 
 namespace smallshogi
 {
-	public class MovePly : IPly
+	public class MovePly : Ply
 	{
-		// Colour of moving player
-		int c;
 		// Index piece moved and piece captured
 		int mI, cI;
 		// A bitboard for moving, promoting and capturing
@@ -21,7 +19,7 @@ namespace smallshogi
 			cI = -1;
 		}
 
-		void IPly.apply (BitBoard[] position)
+		public override void apply (BitBoard[] position)
 		{
 			// Move the piece in question
 			position [pieceI  (c, mI)].And (piece);
@@ -33,29 +31,6 @@ namespace smallshogi
 				var mask = new BitBoard(Game.handMask[Game.demote[cI]]);
 				position[handI(c)].PushMasked(mask);
 			}
-		}
-
-		// Index for hand bitboard
-		int handI (int c)
-		{
-			return 2 * Game.l + c;
-		}
-
-		// Index for piece bitboard
-		int pieceI (int c, int i)
-		{
-			return i + c * Game.l;
-		}
-
-		// Index for promoted piece bitboard
-		int piecePI (int c, int i) {
-			return Game.promote[i] + c * Game.l;
-		}
-
-		// Index for enemy piece bitboard
-		int pieceEI (int c, int i)
-		{
-			return i + ((c + 1) & 1) * Game.l;
 		}
 	}
 }

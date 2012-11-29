@@ -85,8 +85,8 @@ namespace smallshogi
 					b.Set(count);
 					count++;
 				}
-				System.Console.WriteLine(b.toString(12, 12));
 			}
+			// Return the map from piece Type to index
 			return index;
 		}
 
@@ -109,11 +109,27 @@ namespace smallshogi
 		{
 			var children = new List<BitBoard> ();
 
+			// Calculate all squares not occupied by pieces of colour c
+			var colourCnot = colourPieces (position, c).Not ();
+
 			// Do moves of player c (0=white, 1=black) for each piece p
 			for (int p = 0; p < l; ++p) {
+				// This is incorrect
 				var singleMoves = moves (position, p, c);
 				children.AddRange (singleMoves);
+
+				/* For position[p + c * l] extract all bits (i.e. single piece of type p)
+				 * Check where it can move to and whether it captures or not
+				 * Branch on promotion
+				 * put it in a moveply
+				 */
 			}
+			/* For each unpromoted piece type check the hand if that piece is present
+			 * Check where this piece can be dropped (pawn/knight have restrictions)
+			 * Put it in a dropply
+			 */
+
+			// Return all possible plies
 
 			return children;
 		}
