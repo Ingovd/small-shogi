@@ -14,6 +14,12 @@ namespace smallshogi
             this.f = f;
 			this.isRanged = isRanged;
 		}
+
+		public void switchSide()
+		{
+			c *= -1;
+			f *= -1;
+		}
 	}
 }
 

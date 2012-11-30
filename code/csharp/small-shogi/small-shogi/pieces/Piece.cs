@@ -56,17 +56,26 @@ namespace smallshogi
 			return (!b && ranged) || (b && pranged);
 		}
 
+		public void switchSide ()
+		{
+			foreach (var m in moves)
+				m.switchSide();
+			if (pmoves != null)
+				foreach (var m in pmoves)
+					m.switchSide();
+		}
+
 		public Dictionary<BitBoard, BitBoard> generateMoves (int files, int columns, bool p)
 		{
 			var dic = new Dictionary<BitBoard, BitBoard> ();
 			List<Move> selectedMoves = p ? pmoves : moves;
-			if(selectedMoves == null)
+			if (selectedMoves == null)
 				return null;
 
 			for (int j = 0; j < files; ++j)
 				for (int i = 0; i < columns; ++i) {
-				var position = new BitBoard ();
-				position.Set (i + j * columns);
+					var position = new BitBoard ();
+					position.Set (i + j * columns);
 					var moveBoard = new BitBoard ();
 					foreach (Move m in selectedMoves) {
 						if (i + m.c < columns &&
@@ -77,9 +86,46 @@ namespace smallshogi
 					}
 					dic.Add (position, moveBoard);
 				}
-			dic.Add (new BitBoard(), new BitBoard());
+			dic.Add (new BitBoard (), new BitBoard ());
 			return dic;
+		}
+
+		public static string showType (Type t)
+		{
+			switch (t) {
+			case		Type.King:
+				return "k";
+			case		Type.Gold:
+				return "g";
+			case		Type.Silver:
+				return "s";
+			case		Type.Knight:
+				return "n";
+			case		Type.Lance:
+				return "l";
+			case		Type.Pawn:
+				return "p";
+			case		Type.Rook:
+				return "r";
+			case		Type.Bishop:
+				return "b";
+			case		Type.None:
+				return " ";
+			case		Type.PSilver:
+				return "S";
+			case		Type.PKnight:
+				return "K";
+			case		Type.PLance:
+				return "L";
+			case		Type.Tokin:
+				return "T";
+			case		Type.PRook:
+				return "r";
+			case		Type.PBishop:
+				return "B";
+			default:
+				return "?";
+			}
 		}
 	}
 }
-

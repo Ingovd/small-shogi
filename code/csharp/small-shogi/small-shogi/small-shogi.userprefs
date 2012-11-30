@@ -4,12 +4,13 @@
     <Files>
       <File FileName="pieces/Move.cs" Line="15" Column="15" />
       <File FileName="pieces/Piece.cs" Line="53" Column="72" />
-      <File FileName="Main.cs" Line="45" Column="42" />
-      <File FileName="Game.cs" Line="145" Column="4" />
+      <File FileName="Main.cs" Line="12" Column="4" />
+      <File FileName="Game.cs" Line="125" Column="8" />
       <File FileName="Board.cs" Line="14" Column="2" />
-      <File FileName="BitBoard.cs" Line="65" Column="4" />
-      <File FileName="ply/MovePly.cs" Line="36" Column="4" />
-      <File FileName="ply/DropPly.cs" Line="11" Column="30" />
+      <File FileName="BitBoard.cs" Line="6" Column="14" />
+      <File FileName="ply/MovePly.cs" Line="31" Column="61" />
+      <File FileName="ply/DropPly.cs" Line="27" Column="2" />
+      <File FileName="ply/IPly.cs" Line="35" Column="2" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

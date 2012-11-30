@@ -104,6 +104,15 @@ namespace smallshogi
 			bits |= (uint)(1 << i);
 		}
 
+		public bool NotEmpty ()
+		{
+			return bits != 0;
+		}
+
+		public bool Overlaps(BitBoard b) {
+			return (bits & b.bits) != 0;
+		}
+
 		public override int GetHashCode ()
 		{
 			return (int)bits;
@@ -126,7 +135,7 @@ namespace smallshogi
 			return bits == b.bits;
 		}
 
-		public string toString (int width, int length)
+		public string ToString (int width, int length)
 		{
 			string s = "";
 			for (int i = 0; i < length; i++) {

@@ -7,7 +7,9 @@ namespace smallshogi
 		// Colour of moving player
 		protected int c;
 
-		public abstract void apply (BitBoard[] position);
+		public abstract BitBoard[] apply (BitBoard[] position);
+
+		public abstract int pieceMoved();
 
 		// Index for hand bitboard
 		public int handI (int c)

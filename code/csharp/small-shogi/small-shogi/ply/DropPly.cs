@@ -15,13 +15,26 @@ namespace smallshogi
 			this.location = location;
 		}
 
-		public override void apply (BitBoard[] position)
+		public override BitBoard[] apply (BitBoard[] position)
 		{
+			var result = new BitBoard[position.Length];
+			Array.Copy (position, result, position.Length);
 			// Drop the piece in question
-			position [pieceI  (c, dI)].And (location);
+			var pI = pieceI  (c, dI);
+			result [pI] = new BitBoard(result [pI]);
+			result [pI].And (location);
 			// Remove the piece from the player's hand
 			var mask = new BitBoard(Game.handMask[dI]);
-			position[handI(c)].PopMasked(mask);
+			var hI = handI (c);
+			result[hI] = new BitBoard(result[hI]);
+			result[hI].PopMasked(mask);
+
+			return result;
+		}
+
+		public override int pieceMoved ()
+		{
+			return dI;
 		}
 	}
 }
