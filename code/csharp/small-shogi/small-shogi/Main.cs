@@ -55,7 +55,7 @@ namespace smallshogi
 
 			BitBoard[] position = g.startingPos;
 			int c = 0;
-			for(int i = 0; i < 15; ++i) {
+			for(int i = 0; i < 40; ++i) {
 				var plies = g.children (position, c);
                 var player = c == 0 ? "White" : "Black";
                 System.Console.WriteLine(player + " has " + plies.Count + " moves.");
