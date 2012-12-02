@@ -8,6 +8,7 @@ namespace smallshogi
 	{
 		public static void Main (string[] args)
 		{
+            System.Console.BufferHeight = 500;
 			var ul = new Move (-1, -1);
 			var u = new Move (0, -1);
 			var ur = new Move (1, -1);
@@ -19,7 +20,7 @@ namespace smallshogi
 			Move[] kingArray = {ul, u, ur, l, r, dl, d, dr};
 			Move[] bishopArray = {ul, ur, dl, dr};
 			Move[] rookArray = {u, l, r, d};
-			Move[] pawnArray = {u};
+			Move[] pawnArray = {d};
 			Move[] tokinArray = {ul, u, ur, l, r, d};
 			var kingMoves = new List<Move> (kingArray);
 			var bishopMoves = new List<Move> (bishopArray);
@@ -55,15 +56,19 @@ namespace smallshogi
 			BitBoard[] position = g.startingPos;
 			int c = 0;
 			for(int i = 0; i < 15; ++i) {
-				System.Console.WriteLine(g.prettyPrint(position));
 				var plies = g.children (position, c);
+                var player = c == 0 ? "White" : "Black";
+                System.Console.WriteLine(player + " has " + plies.Count + " moves.");
+                Ply last = null;
 				foreach (var p in plies) {
 					int j = p.pieceMoved();
 					var s = Piece.showType (j < pieces.Length ? pieces [j].type : pieces [Game.demote [j]].ptype);
 					Console.WriteLine ("Moving " + s);
-					position = p.apply(position);
-					break;
+                    System.Console.WriteLine(g.prettyPrint(p.apply(position)));
+                    last = p;
 				}
+                if(last != null)
+                    position = last.apply(position);
 				c ^= 1;
 			}
 

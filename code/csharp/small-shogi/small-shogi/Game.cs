@@ -115,6 +115,8 @@ namespace smallshogi
 				// Promoted moveset white
 				if (p.ptype != Type.None)
 					moveSets.Add (index [p.ptype], p.generateMoves (files, columns, true));
+
+                // Mirror the moves of this piece
 				p.switchSide ();
 				// Unpromoted moveset black
 				moveSets.Add (index [p.type] + l, p.generateMoves (files, columns, false));
@@ -148,10 +150,11 @@ namespace smallshogi
 						// Add ply without promotion
 						plies.Add (ply);
 						// Check for promotion and branch if it is possible
-						if (p < pieces.Length && pieces [p].type != Type.None)
-						if (promoMask [c].Overlaps (square) || promoMask [c].Overlaps (move)) {
-							plies.Add (ply.branchPromotion ());
-						}
+                        if (p < pieces.Length && pieces[p].ptype != Type.None)
+                            if (promoMask[c].Overlaps(square) || promoMask[c].Overlaps(move))
+                            {
+                                plies.Add(ply.branchPromotion());
+                            }
 					}
 				}
 			}
@@ -176,7 +179,7 @@ namespace smallshogi
 		public List<BitBoard> moves (BitBoard square, int p, int c, BitBoard notCPieces)
 		{
 			BitBoard possibleMoves;
-			if (pieces [p].isRanged (p >= pieces.Length))
+			if (pieces [demote[p]].isRanged (p >= pieces.Length))
 				// Do some shit for ranged pieces
 				possibleMoves = new BitBoard (0);
 			else
@@ -239,10 +242,7 @@ namespace smallshogi
 					s += "\n";
 				s += ss [i] != null ? ss [i] : ".";
 			}
-			s += "\n\n";
-			s += position[2*l].ToString(3, 12);
-			s += "\n\n";
-			s += position[2*l+1].ToString(3, 12);
+			s += "\n";
 			return s;
 		}
 	}

@@ -58,11 +58,17 @@ namespace smallshogi
 
 		public void switchSide ()
 		{
+            var switchedMoves = new List<Move>();
 			foreach (var m in moves)
-				m.switchSide();
-			if (pmoves != null)
-				foreach (var m in pmoves)
-					m.switchSide();
+				switchedMoves.Add(m.switchSide());
+            moves = switchedMoves;
+            if (pmoves != null)
+            {
+                var switchedPMoves = new List<Move>();
+                foreach (var m in pmoves)
+                    switchedPMoves.Add(m.switchSide());
+                pmoves = switchedPMoves;
+            }
 		}
 
 		public Dictionary<BitBoard, BitBoard> generateMoves (int files, int columns, bool p)
