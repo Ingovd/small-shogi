@@ -8,6 +8,7 @@
 code/csharp/small-shogi/small-shogi/bin/Debug*
 code/csharp/small-shogi/small-shogi/obj*.
 bin/
+Debug/
 *.suo
 *.db
 
