@@ -24,6 +24,7 @@ namespace smallshogi
 		public MovePly branchPromotion ()
 		{
 			var promoPly = new MovePly(c, mI, square, move);
+            promoPly.setCaptureIndex(cI);
 			promoPly.setPromotion();
 			return promoPly;
 		}

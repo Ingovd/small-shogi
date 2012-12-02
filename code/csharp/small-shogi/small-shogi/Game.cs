@@ -12,6 +12,8 @@ namespace smallshogi
 		public BitBoard[] startingPos;
 		// A list of pieces used for move generation
 		Piece[] pieces; 
+        // Map from piece type to piece index
+        public static Dictionary<Type, int> index;
 		// Attack boards for pieces
 		public static Dictionary<int, Dictionary<BitBoard, BitBoard>> moveSets;
 		// Number of movesets (pieces + promoted pieces)
@@ -31,8 +33,8 @@ namespace smallshogi
 			this.columns = columns;
 			this.pieces = pieces;
 
-			var index = generateInitialSetup (white, black);
-			generateMoveSets (index);
+			index = generateInitialSetup (white, black);
+			generateMoveSets ();
 
 			// Create the masks for both player's promotion zones
 			var whitePromo = new BitBoard ();
@@ -104,7 +106,7 @@ namespace smallshogi
 			return index;
 		}
 
-		private void generateMoveSets (Dictionary<Type, int> index)
+		private void generateMoveSets ()
 		{
 			// Preprocess the moves for each piece
 			moveSets = new Dictionary<int, Dictionary<BitBoard, BitBoard>> ();
@@ -215,9 +217,14 @@ namespace smallshogi
 			return -1;
 		}
 
-		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, win, lose
+		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, white win, black win
 		public int gamePosition (BitBoard[] position)
 		{
+            var kingIndex = index[Type.King];
+            if (position[kingIndex].IsEmpty())
+                return 2;
+            if (position[kingIndex + l].IsEmpty())
+                return 1;
 			return -1;
 		}
 

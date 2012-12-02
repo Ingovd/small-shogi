@@ -55,20 +55,30 @@ namespace smallshogi
 
 			BitBoard[] position = g.startingPos;
 			int c = 0;
-			for(int i = 0; i < 40; ++i) {
+			for(int i = 0; i < 10; ++i) {
 				var plies = g.children (position, c);
                 var player = c == 0 ? "White" : "Black";
                 System.Console.WriteLine(player + " has " + plies.Count + " moves.");
-                Ply last = null;
+                BitBoard[] last = null;
+                Ply lastPly = null;
 				foreach (var p in plies) {
-					int j = p.pieceMoved();
-					var s = Piece.showType (j < pieces.Length ? pieces [j].type : pieces [Game.demote [j]].ptype);
-					Console.WriteLine ("Moving " + s);
-                    System.Console.WriteLine(g.prettyPrint(p.apply(position)));
-                    last = p;
+                    var newPos = p.apply(position);
+                    /*int j = p.pieceMoved();
+                    var s = Piece.showType(j < pieces.Length ? pieces[j].type : pieces[Game.demote[j]].ptype);
+                    Console.WriteLine("Moving " + s);
+                    System.Console.WriteLine(g.prettyPrint(newPos));*/
+                    if (g.gamePosition(newPos) < 0)
+                    {
+                        last = newPos;
+                        lastPly = p;
+                    }
 				}
-                if(last != null)
-                    position = last.apply(position);
+                int j = lastPly.pieceMoved();
+                var s = Piece.showType(j < pieces.Length ? pieces[j].type : pieces[Game.demote[j]].ptype);
+                Console.WriteLine("Moving " + s);
+                System.Console.WriteLine(g.prettyPrint(last));
+                System.Console.WriteLine("Game position is: " + g.gamePosition(position));
+                position = last;
 				c ^= 1;
 			}
 

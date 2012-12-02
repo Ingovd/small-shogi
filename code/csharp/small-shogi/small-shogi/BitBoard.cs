@@ -104,6 +104,11 @@ namespace smallshogi
 			bits |= (uint)(1 << i);
 		}
 
+        public bool IsEmpty()
+        {
+            return bits == 0;
+        }
+
 		public bool NotEmpty ()
 		{
 			return bits != 0;
