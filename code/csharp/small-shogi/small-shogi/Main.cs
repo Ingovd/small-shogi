@@ -77,7 +77,6 @@ namespace smallshogi
                 var s = Piece.showType(j < pieces.Length ? pieces[j].type : pieces[Game.demote[j]].ptype);
                 Console.WriteLine("Moving " + s);
                 System.Console.WriteLine(g.prettyPrint(last));
-                System.Console.WriteLine("Game position is: " + g.gamePosition(position));
                 position = last;
 				c ^= 1;
 			}
