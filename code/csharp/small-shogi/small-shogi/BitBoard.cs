@@ -118,6 +118,10 @@ namespace smallshogi
 			return (bits & b.bits) != 0;
 		}
 
+		public bool Subset(BitBoard b) {
+			return (bits & b.bits) == bits;
+		}
+
 		public override int GetHashCode ()
 		{
 			return (int)bits;

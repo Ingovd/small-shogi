@@ -12,8 +12,8 @@ namespace smallshogi
 		public BitBoard[] startingPos;
 		// A list of pieces used for move generation
 		Piece[] pieces; 
-        // Map from piece type to piece index
-        public static Dictionary<Type, int> index;
+		// Map from piece type to piece index
+		public static Dictionary<Type, int> index;
 		// Attack boards for pieces
 		public static Dictionary<int, Dictionary<BitBoard, BitBoard>> moveSets;
 		// Number of movesets (pieces + promoted pieces)
@@ -118,7 +118,7 @@ namespace smallshogi
 				if (p.ptype != Type.None)
 					moveSets.Add (index [p.ptype], p.generateMoves (files, columns, true));
 
-                // Mirror the moves of this piece
+				// Mirror the moves of this piece
 				p.switchSide ();
 				// Unpromoted moveset black
 				moveSets.Add (index [p.type] + l, p.generateMoves (files, columns, false));
@@ -152,27 +152,27 @@ namespace smallshogi
 						// Add ply without promotion
 						plies.Add (ply);
 						// Check for promotion and branch if it is possible
-                        if (p < pieces.Length && pieces[p].ptype != Type.None)
-                            if (promoMask[c].Overlaps(square) || promoMask[c].Overlaps(move))
-                            {
-                                plies.Add(ply.branchPromotion());
-                            }
+						if (p < pieces.Length && pieces [p].ptype != Type.None)
+						if (promoMask [c].Overlaps (square) || promoMask [c].Overlaps (move)) {
+							plies.Add (ply.branchPromotion ());
+						}
 					}
 				}
 			}
 			// Get the players hand information
 			var hand = new BitBoard (position [2 * l + c]);
 			// If it is not empty calculate empty squares
-			if (!hand.NotEmpty ()) {
+			if (hand.NotEmpty ()) {
 				var all = notCPieces.Xor (enemyPieces);
 				// Loop through all piece types
-				foreach (var pieceInHand in handMask)
+				foreach (var pieceMask in handMask) {
 					// Check if the player has this piece
-					if (hand.Overlaps (pieceInHand.Value))
+					if (hand.Overlaps (pieceMask.Value))
 						// Calculate all positions where it can be dropped
 						foreach (BitBoard square in hand.And (all).allOnes())
 							// Add a drop ply for each possible drop
-							plies.Add (new DropPly (c, pieceInHand.Key, square));
+							plies.Add (new DropPly (c, pieceMask.Key, square));
+				}
 			}
 			// Return all possible plies
 			return plies;
@@ -181,7 +181,7 @@ namespace smallshogi
 		public List<BitBoard> moves (BitBoard square, int p, int c, BitBoard notCPieces)
 		{
 			BitBoard possibleMoves;
-			if (pieces [demote[p]].isRanged (p >= pieces.Length))
+			if (pieces [demote [p]].isRanged (p >= pieces.Length))
 				// Do some shit for ranged pieces
 				possibleMoves = new BitBoard (0);
 			else
@@ -220,12 +220,49 @@ namespace smallshogi
 		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, white win, black win
 		public int gamePosition (BitBoard[] position)
 		{
-            var kingIndex = index[Type.King];
-            if (position[kingIndex].IsEmpty())
-                return 2;
-            if (position[kingIndex + l].IsEmpty())
-                return 1;
+			var kingIndex = index [Type.King];
+			if (position [kingIndex].IsEmpty ())
+				return 2;
+			if (position [kingIndex + l].IsEmpty ())
+				return 1;
 			return -1;
+		}
+
+		// Returns -1 if this is not terminal, returns 0 if c is checkmated
+		public int gamePosition (BitBoard[] position, int c)
+		{
+			var kingIndex = index [Type.King + c*l];
+			var enemyAttacks = new BitBoard ();
+			for (int p = 0; p < l; ++p) {
+				foreach (BitBoard square in position[p + (c^1)*l].allOnes()) {
+					enemyAttacks.Or(moveSets[p][square]);
+				}
+			}
+			var king = new BitBoard(position[kingIndex]);
+			king.Or (moveSets[kingIndex][king]);
+			if(position[kingIndex].Subset(enemyAttacks))
+				return 0;
+			return -1;
+		}
+
+		public bool SamePosition (BitBoard[] p1, BitBoard[] p2)
+		{
+			if (p1.Length != p2.Length)
+				return false;
+			for (int i = 0; i < p1.Length; ++i) {
+				if (!p1.Equals (p2))
+					return false;
+			}
+			return true;
+		}
+
+		// Hashfunction for positions
+		public int hashPosition (BitBoard[] position)
+		{
+			var hash = 982451653;
+			foreach (BitBoard b in position)
+				hash = 31 * hash + (int)b.bits;
+			return hash;
 		}
 
 		public string prettyPrint (BitBoard[] position)
@@ -236,20 +273,51 @@ namespace smallshogi
 				b.Set (i);
 				map.Add (b, i);
 			}
-			string[] ss = new string[files * columns];
+			string[] whites = new string[files * columns];
+			string[] blacks = new string[files * columns];
 			for (int i = 0; i < l; ++i) {
 				foreach (var b in position[i].allOnes())
-					ss [map [b]] = Piece.showType (i < pieces.Length ? pieces [i].type : pieces [demote [i]].ptype);
+					whites [map [b]] = Piece.showType (i < pieces.Length ? pieces [i].type : pieces [demote [i]].ptype);
 				foreach (var b in position[i+l].allOnes())
-					ss [map [b]] = Piece.showType (i < pieces.Length ? pieces [i].type : pieces [demote [i]].ptype);
+					blacks [map [b]] = Piece.showType (i < pieces.Length ? pieces [i].type : pieces [demote [i]].ptype);
 			}
 			string s = "";
-			for (int i = 0; i < files * columns; i++) {
-				if (i % columns == 0 && i != 0)
-					s += "\n";
-				s += ss [i] != null ? ss [i] : ".";
+
+			var hand = new BitBoard (position [2 * l]);
+			if (hand.NotEmpty ()) {
+				foreach (var pieceMask in handMask) {
+					hand = new BitBoard (position [2 * l]);
+					foreach (var p in hand.And (pieceMask.Value).allOnes())
+						s += Piece.showType (pieces [pieceMask.Key].type);
+				}
 			}
 			s += "\n";
+
+			for (int f = 0; f < files; ++f) {
+				for (int c = 0; c < columns; ++c)
+					s += "+--";
+				s += "+\n";
+				for (int c = 0; c < columns; ++c) {
+					s += "|";
+					s += whites [c + f * columns] != null ? whites [c + f * columns] : " ";
+					s += blacks [c + f * columns] != null ? blacks [c + f * columns] : " ";
+				}
+				s += "|\n";
+			}
+			for (int c = 0; c < columns; ++c)
+				s += "+--";
+			s += "+\n";
+
+			hand = new BitBoard (position [2 * l + 1]);
+			if (hand.NotEmpty ()) {
+				foreach (var pieceMask in handMask) {
+					hand = new BitBoard (position [2 * l + 1]);
+					foreach (var p in hand.And (pieceMask.Value).allOnes())
+						s += Piece.showType (pieces [pieceMask.Key].type);
+				}
+			}
+			s += "\n";
+
 			return s;
 		}
 	}

@@ -22,7 +22,7 @@ namespace smallshogi
 			// Drop the piece in question
 			var pI = pieceI  (c, dI);
 			result [pI] = new BitBoard(result [pI]);
-			result [pI].And (location);
+			result [pI].Xor (location);
 			// Remove the piece from the player's hand
 			var mask = new BitBoard(Game.handMask[dI]);
 			var hI = handI (c);

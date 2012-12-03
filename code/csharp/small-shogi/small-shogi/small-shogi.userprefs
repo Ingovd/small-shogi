@@ -1,16 +1,18 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="Game.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="search/AndOrSearch.cs">
     <Files>
-      <File FileName="pieces/Move.cs" Line="15" Column="15" />
-      <File FileName="pieces/Piece.cs" Line="53" Column="72" />
-      <File FileName="Main.cs" Line="12" Column="4" />
-      <File FileName="Game.cs" Line="125" Column="8" />
+      <File FileName="pieces/Move.cs" Line="1" Column="1" />
+      <File FileName="pieces/Piece.cs" Line="1" Column="1" />
+      <File FileName="Main.cs" Line="1" Column="1" />
+      <File FileName="Game.cs" Line="1" Column="1" />
       <File FileName="Board.cs" Line="14" Column="2" />
-      <File FileName="BitBoard.cs" Line="6" Column="14" />
-      <File FileName="ply/MovePly.cs" Line="31" Column="61" />
-      <File FileName="ply/DropPly.cs" Line="27" Column="2" />
-      <File FileName="ply/IPly.cs" Line="35" Column="2" />
+      <File FileName="BitBoard.cs" Line="1" Column="1" />
+      <File FileName="ply/MovePly.cs" Line="1" Column="1" />
+      <File FileName="ply/DropPly.cs" Line="37" Column="14" />
+      <File FileName="ply/IPly.cs" Line="12" Column="36" />
+      <File FileName="search/AndOrSearch.cs" Line="17" Column="38" />
+      <File FileName="search/Node.cs" Line="8" Column="28" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
