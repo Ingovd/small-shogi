@@ -5,9 +5,10 @@ namespace smallshogi
 {
 	public class INode
 	{
-		BitBoard[] position;
-		List<INode> children;
-		public static Dictionary<int, BitBoard[]> transposition = new Dictionary<int, BitBoard[]> ();
+		public BitBoard[] position;
+		public List<INode> children;
+        public int value;
+		public static Dictionary<int, INode> transposition = new Dictionary<int, INode> ();
 
 		public INode (BitBoard[] position)
 		{
@@ -17,17 +18,18 @@ namespace smallshogi
 
 		public void Expand (Game g, int c)
 		{
-			transposition.Add (g.hashPosition (position), position);
+			transposition.Add (g.hashPosition (position), this);
 			foreach (var p in g.children(position, c)) {
 				var newPosition = p.apply (position);
+                //Console.WriteLine(g.prettyPrint(newPosition));
+                var newINode = new INode(newPosition);
+                children.Add(newINode);
 				if (!transposition.ContainsKey (g.hashPosition (newPosition))) {
-					var newINode = new INode (newPosition);
-					children.Add (newINode);
 					if (g.gamePosition (newPosition) < 0)
-						newINode.Expand (g, c ^ 1);
+                        newINode.Expand(g, c ^ 1);
 				} else {
 					var tabledPosition = transposition [g.hashPosition (newPosition)];
-					if (g.SamePosition (tabledPosition, newPosition))
+					if (g.SamePosition (tabledPosition.position, newPosition))
 						System.Console.WriteLine ("Warning: we have a collision!");
 				}
 			}
@@ -45,13 +47,14 @@ namespace smallshogi
 					foreach (var child in children)
 						unit = unit | child.Solve (g, c^1);
 				}
-				return unit;
+				value = unit;
 			} else {
-				if (pos == 1)
-					return 0;
-				else
-					return 1;
+                if (pos == 1)
+                    value = 0;
+                else
+                    value = 1;
 			}
+            return value;
 		}
 
 		public void show (Game g)
@@ -62,12 +65,12 @@ namespace smallshogi
 				child.show (g);
 		}
 
-		public int Depth ()
+		public int Height ()
 		{
-			var maxDepth = 0;
+			var maxHeight = 0;
 			foreach (var child in children)
-				maxDepth = Math.Max(maxDepth, child.Depth());
-			return maxDepth + 1;
+				maxHeight = Math.Max(maxHeight, child.Height());
+			return maxHeight + 1;
 		}
 
 		public int Size ()
@@ -77,6 +80,14 @@ namespace smallshogi
 				size += child.Size ();
 			return size;
 		}
+
+        public override int GetHashCode()
+        {
+            var hash = 982451653;
+            foreach (BitBoard b in position)
+                hash = 31 * hash + (int)b.bits;
+            return hash;
+        }
 	}
 }
 

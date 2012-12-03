@@ -19,23 +19,32 @@ namespace smallshogi
 			var dl = new Move (-1, 1);
 			var d = new Move (0, 1);
 			var dr = new Move (1, 1);
+            //var nl = new Move(-1, -2);
+            //var nr = new Move(1, -2);
 			// Define moves per piece
 			Move[] kingArray = {ul, u, ur, l, r, dl, d, dr};
 			Move[] bishopArray = {ul, ur, dl, dr};
 			Move[] rookArray = {u, l, r, d};
 			Move[] pawnArray = {d};
 			Move[] tokinArray = {ul, u, ur, l, r, d};
+           // Move[] silverArray = {ul, u, ur, dr, dl};
+            //Move[] knightArray = { nr, nl };
 			var kingMoves = new List<Move> (kingArray);
 			var bishopMoves = new List<Move> (bishopArray);
 			var rookMoves = new List<Move> (rookArray);
 			var pawnMoves = new List<Move> (pawnArray);
 			var tokinMoves = new List<Move> (tokinArray);
+           // var silverMoves = new List<Move>(silverArray);
+            //var knightMoves = new List<Move>(knightArray);
 
 			// Instantiate the Piece objects
 			var king = new Piece (kingMoves, Type.King);
 			var bishop = new Piece (bishopMoves, Type.Bishop);
 			var rook = new Piece (rookMoves, Type.Rook);
 			var pawn = new Piece (pawnMoves, Type.Pawn, tokinMoves, Type.Tokin);
+            //var silver = new Piece(silverMoves, Type.Silver, tokinMoves, Type.PSilver);
+            //var knight = new Piece(knightMoves, Type.Knight, tokinMoves, Type.PKnight);
+            //var gold = new Piece(tokinMoves, Type.Gold);
 			Piece[] pieces = { king, bishop, rook, pawn };
 
 			// Set up the initial board configuration
@@ -49,8 +58,23 @@ namespace smallshogi
 			black [10] = Type.King;
 			black [11] = Type.Bishop;
 			black [ 7] = Type.Pawn;
+            /*white[0] = Type.King;
+            white[1] = Type.Gold;
+            white[2] = Type.Silver;
+            white[3] = Type.Bishop;
+            white[4] = Type.Rook;
+            white[5] = Type.Pawn;
+            black[24] = Type.King;
+            black[23] = Type.Gold;
+            black[22] = Type.Silver;
+            black[21] = Type.Bishop;
+            black[20] = Type.Rook;
+            black[19] = Type.Pawn;*/
+
+
 			
 			Game g = new Game (white, black, 4, 3, 1, pieces);
+            //Game g = new Game(white, black, 5, 5, 1, pieces);
 
 			/*BitBoard[] position = g.startingPos;
 			int c = 0;
@@ -82,6 +106,11 @@ namespace smallshogi
 			System.Console.WriteLine(s + " won after " + sequence.depth + " plies.");
 			sequence.show(g);*/
 
+            foreach (var p in g.children(g.startingPos, 1))
+            {
+                System.Console.WriteLine(g.prettyPrint(p.apply(g.startingPos)));
+            }
+
 			var root = new INode(g.startingPos);
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
@@ -89,8 +118,14 @@ namespace smallshogi
 			sw.Stop();
 			System.Console.WriteLine("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
 			System.Console.WriteLine("Number of nodes:   " + root.Size());
-			System.Console.WriteLine("Tree depth:        " + root.Depth());
+			System.Console.WriteLine("Tree depth:        " + root.Height());
 			System.Console.WriteLine("Game value:        " + root.Solve (g, 1));
+
+            foreach (var child in root.children)
+            {
+                System.Console.WriteLine(g.prettyPrint(child.position));
+                System.Console.WriteLine("Game value: " + child.value);
+            }
 
 
             Console.Read();
