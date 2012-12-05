@@ -45,7 +45,7 @@ namespace smallshogi
 					e = 0;
 				}
 
-				var hash = g.hashPosition (position);
+				var hash = g.hashPosition (position, c);
 				if (transposition.ContainsKey (hash)) {
 					if (g.SamePosition (transposition [hash], position))
 						System.Console.WriteLine ("Warning: we have a collision!");

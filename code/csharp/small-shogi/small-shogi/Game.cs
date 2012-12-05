@@ -186,9 +186,9 @@ namespace smallshogi
 				possibleMoves = new BitBoard (0);
 			else
 				// Get the dictionary for the correct piece type
-				possibleMoves = moveSets [p + c * l]
+				possibleMoves = new BitBoard(moveSets [p + c * l]
 					// Get squares attacked by p with colour c
-                    [square];
+                    [square]);
 
 			// Eliminate squares occupied by the same colour
 			possibleMoves.And (notCPieces);
@@ -228,20 +228,29 @@ namespace smallshogi
 			return -1;
 		}
 
-		// Returns -1 if this is not terminal, returns 0 if c is checkmated
+		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, white win, black win
 		public int gamePosition (BitBoard[] position, int c)
 		{
-			var kingIndex = index [Type.King + c*l];
-			var enemyAttacks = new BitBoard ();
+			var kingIndex = index [Type.King];
+			// Return if either king is missing
+			if (position [kingIndex].IsEmpty ())
+				return 2;
+			if (position [kingIndex + l].IsEmpty ())
+				return 1;
+
+			// Otherwise check if the moving player can capture the enemy king
+			var attacks = new BitBoard ();
 			for (int p = 0; p < l; ++p) {
-				foreach (BitBoard square in position[p + (c^1)*l].allOnes()) {
-					enemyAttacks.Or(moveSets[p][square]);
+				foreach (BitBoard square in position[p + c*l].allOnes()) {
+					attacks.Or (moveSets [p] [square]);
 				}
 			}
-			var king = new BitBoard(position[kingIndex]);
-			king.Or (moveSets[kingIndex][king]);
-			if(position[kingIndex].Subset(enemyAttacks))
-				return 0;
+
+			if (position [kingIndex + (c ^ 1) * l].Subset (attacks)) {
+				return 1 + c;
+			}
+
+			// This position is not terminal
 			return -1;
 		}
 
@@ -256,12 +265,13 @@ namespace smallshogi
 			return true;
 		}
 
-		// Hashfunction for positions
-		public int hashPosition (BitBoard[] position)
+		// Hashfunction for positions including player to move
+		public int hashPosition (BitBoard[] position, int c)
 		{
 			var hash = 982451653;
 			foreach (BitBoard b in position)
 				hash = 31 * hash + (int)b.bits;
+			hash ^= c*2147483647 ;
 			return hash;
 		}
 

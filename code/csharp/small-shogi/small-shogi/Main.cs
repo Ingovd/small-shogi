@@ -106,15 +106,10 @@ namespace smallshogi
 			System.Console.WriteLine(s + " won after " + sequence.depth + " plies.");
 			sequence.show(g);*/
 
-            foreach (var p in g.children(g.startingPos, 1))
-            {
-                System.Console.WriteLine(g.prettyPrint(p.apply(g.startingPos)));
-            }
-
-			var root = new INode(g.startingPos);
+			var root = new INode(g.startingPos, 1);
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
-			root.Expand (g, 1);
+			INode.ExpandRoot(root, g);
 			sw.Stop();
 			System.Console.WriteLine("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
 			System.Console.WriteLine("Number of nodes:   " + root.Size());

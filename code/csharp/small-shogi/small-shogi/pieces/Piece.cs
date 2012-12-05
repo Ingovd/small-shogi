@@ -90,6 +90,10 @@ namespace smallshogi
 							j + m.f >= 0)
 							moveBoard.Set (i + m.c + (j + m.f) * columns);
 					}
+				/*Console.WriteLine(Piece.showType (p ? ptype : type));
+				Console.WriteLine(position.ToString(3, 12));
+				Console.WriteLine("---");
+				Console.WriteLine(moveBoard.ToString(3, 12));*/
 					dic.Add (position, moveBoard);
 				}
 			dic.Add (new BitBoard (), new BitBoard ());
