@@ -9,13 +9,17 @@ namespace smallshogi
 		public List<INode> children;
 		public int c;
 		public int value;
+		public int pn;
 		public static Dictionary<INode, INode> transposition = new Dictionary<INode, INode> ();
 		public static Stack<INode> stackMothaFucka = new Stack<INode> ();
+		public static Queue<INode> queue = new Queue<INode> ();
 
 		public INode (BitBoard[] position, int c)
 		{
 			this.position = position;
 			this.c = c;
+			value = -1;
+			pn = 1;
 			children = new List<INode> ();
 		}
 
@@ -25,6 +29,21 @@ namespace smallshogi
 			INode node = null;
 			while ((node = stackMothaFucka.Pop ()) != null)
 				node.Expand (g);
+		}
+
+		public static void BreadthFirst (INode root, Game g)
+		{
+			transposition.Add (root, root);
+			queue.Enqueue (root);
+			INode node = null;
+			while ((node = queue.Dequeue ()) != null) {
+				if(node.Equals(root)) {
+					Console.WriteLine("Root get!");
+					if(root.pn != 1)
+						return;
+				}
+				node.Solve2 (g);
+			}
 		}
 
 		public void Expand (Game g)
@@ -55,6 +74,28 @@ namespace smallshogi
 			}
 		}
 
+		public void Expand2 (Game g)
+		{
+			// Generate and expand children
+			foreach (var p in g.children(position, c)) {
+				var newPosition = p.apply (position);
+				var newINode = new INode (newPosition, c ^ 1);
+				children.Add (newINode);
+
+				// Stop expanding if this position has already occured
+				if (transposition.ContainsKey (newINode)) {
+					/*INode tabledINode = null;
+					transposition.TryGetValue(newINode, out tabledINode);
+					if (!tabledINode.Equals(newINode))
+						System.Console.WriteLine ("Warning: we have a collision!");*/
+					continue;
+				}
+
+				// New position, add to transposition, children and stack
+				transposition.Add (newINode, newINode);
+			}
+		}
+
 		public int Solve (Game g, int c)
 		{
 			int unit = c ^ 1;
@@ -75,6 +116,45 @@ namespace smallshogi
 					value = 1;
 			}
 			return value;
+		}
+
+		public int Solve2 (Game g)
+		{
+			Console.WriteLine (queue.Count);
+
+			if (value < 0) {
+				value = g.gamePosition (position, c);
+				if (value >= 0) {
+					pn = (value - 1) * Int32.MaxValue;
+					return pn;
+				}
+			}
+
+			if (children.Count == 0)
+				Expand2(g);
+
+
+			// Black is maximising (1) white is minimising (-1)
+			int sign = (2 * c) - 1;
+			int e = Int32.MaxValue * (c ^ 1);
+			foreach (var child in children) {
+				var tchild = transposition[child];
+				//Console.WriteLine(tchild.pn);
+				e = sign * Math.Max (sign * tchild.pn, sign * e);
+			}
+			if (e == Int32.MaxValue * c) {
+				pn = e;
+				Console.WriteLine(pn);
+				return pn;
+			}
+			foreach (var child in children) {
+				var tchild = transposition[child];
+				if (tchild.pn == 1) {
+					queue.Enqueue(tchild);
+				}
+			}
+			queue.Enqueue(this);
+			return pn;
 		}
 
 		public void show (Game g)

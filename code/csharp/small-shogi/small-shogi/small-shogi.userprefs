@@ -4,13 +4,14 @@
     <Files>
       <File FileName="pieces/Move.cs" Line="1" Column="1" />
       <File FileName="pieces/Piece.cs" Line="90" Column="21" />
-      <File FileName="Main.cs" Line="107" Column="23" />
-      <File FileName="Game.cs" Line="275" Column="16" />
+      <File FileName="Main.cs" Line="121" Column="44" />
+      <File FileName="Game.cs" Line="278" Column="17" />
       <File FileName="Board.cs" Line="14" Column="2" />
       <File FileName="BitBoard.cs" Line="132" Column="1" />
       <File FileName="ply/MovePly.cs" Line="1" Column="1" />
       <File FileName="ply/DropPly.cs" Line="23" Column="29" />
-      <File FileName="search/INode.cs" Line="108" Column="15" />
+      <File FileName="search/INode.cs" Line="136" Column="4" />
+      <File FileName="search/Node.cs" Line="23" Column="24" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">

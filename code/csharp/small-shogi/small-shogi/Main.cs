@@ -109,7 +109,7 @@ namespace smallshogi
 			var root = new INode(g.startingPos, 1);
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
-			INode.ExpandRoot(root, g);
+			INode.BreadthFirst(root, g);
 			sw.Stop();
 			System.Console.WriteLine("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
 			System.Console.WriteLine("Number of nodes:   " + root.Size());
