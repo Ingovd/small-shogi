@@ -5,179 +5,152 @@ namespace smallshogi
 {
 	public class INode
 	{
+		// Board position
 		public BitBoard[] position;
+		// Children nodes
 		public List<INode> children;
+		// Player to move
 		public int c;
+		// Game value
 		public int value;
+		// Proof number
 		public int pn;
+		// Flag if this node is already queued
+		public bool queued;
 		public static Dictionary<INode, INode> transposition = new Dictionary<INode, INode> ();
 		public static Stack<INode> stackMothaFucka = new Stack<INode> ();
 		public static Queue<INode> queue = new Queue<INode> ();
+
+		static int da, ea;
 
 		public INode (BitBoard[] position, int c)
 		{
 			this.position = position;
 			this.c = c;
-			value = -1;
-			pn = 1;
-			children = new List<INode> ();
-		}
 
-		public static void ExpandRoot (INode root, Game g)
-		{
-			stackMothaFucka.Push (root);
-			INode node = null;
-			while ((node = stackMothaFucka.Pop ()) != null)
-				node.Expand (g);
+			// Default game value is -2: unknown
+			value = -2;
+			// Default proof number is nonzero en smaller than Maxvalue
+			pn = 1;
+			children = null;
 		}
 
 		public static void BreadthFirst (INode root, Game g)
 		{
 			transposition.Add (root, root);
-			queue.Enqueue (root);
+			root.Enqueue ();
 			INode node = null;
-			while ((node = queue.Dequeue ()) != null) {
-				if(node.Equals(root)) {
-					Console.WriteLine("Root get!");
-					if(root.pn != 1)
+			while (queue.Count != 0) {
+				node = Dequeue ();
+				if (node.Equals (root)) {
+					Console.WriteLine(transposition.Count);
+					if (root.pn != 1)
 						return;
 				}
-				node.Solve2 (g);
+				if (transposition.Count > 100000)
+					return;
+				if (node.pn == 1)
+					node.Solve (g);
 			}
 		}
 
+		public static INode Dequeue ()
+		{
+			da++;
+			var node = queue.Dequeue ();
+			node.queued = false;
+			return node;
+		}
+
+		public void Enqueue ()
+		{
+			ea++;
+			if (!queued) 
+				queued = true;
+				queue.Enqueue (this);
+			
+		}
+		
 		public void Expand (Game g)
 		{
-			Console.WriteLine(g.prettyPrint(position));
-			Console.WriteLine(stackMothaFucka.Count);
+			//Console.WriteLine(g.prettyPrint(position));
 			// Generate and expand children
 			foreach (var p in g.children(position, c)) {
 				var newPosition = p.apply (position);
 				var newINode = new INode (newPosition, c ^ 1);
 
-				// Stop expanding if this position has already occured
-				if (transposition.ContainsKey (newINode)) {
-					var tabledINode = transposition [newINode];
-					if (!tabledINode.position.Equals(newINode))
-						System.Console.WriteLine ("Warning: we have a collision!");
-					continue;
-				}
-
-				// New position, add to transposition, children and stack
-				transposition.Add (newINode, newINode);
-				children.Add (newINode);
-
-				// Don't push if this position is terminal
-				if (g.gamePosition (newINode.position, c ^ 1) >= 0)
-					continue;
-				stackMothaFucka.Push (newINode);
-			}
-		}
-
-		public void Expand2 (Game g)
-		{
-			// Generate and expand children
-			foreach (var p in g.children(position, c)) {
-				var newPosition = p.apply (position);
-				var newINode = new INode (newPosition, c ^ 1);
-				children.Add (newINode);
-
-				// Stop expanding if this position has already occured
-				if (transposition.ContainsKey (newINode)) {
-					/*INode tabledINode = null;
-					transposition.TryGetValue(newINode, out tabledINode);
-					if (!tabledINode.Equals(newINode))
-						System.Console.WriteLine ("Warning: we have a collision!");*/
-					continue;
-				}
-
-				// New position, add to transposition, children and stack
-				transposition.Add (newINode, newINode);
-			}
-		}
-
-		public int Solve (Game g, int c)
-		{
-			int unit = c ^ 1;
-			int pos = g.gamePosition (position, c);
-			if (pos < 0) {
-				if (c == 0) {
-					foreach (var child in children)
-						unit = unit & child.Solve (g, c ^ 1);
+				INode tabled = null;
+				if (transposition.TryGetValue (newINode, out tabled)) {
+					children.Add (tabled);
 				} else {
-					foreach (var child in children)
-						unit = unit | child.Solve (g, c ^ 1);
+					newINode.value = g.gamePosition (newINode.position, c ^ 1);
+					children.Add (newINode);
+					transposition.Add (newINode, newINode);
 				}
-				value = unit;
-			} else {
-				if (pos == 1)
-					value = 0;
-				else
-					value = 1;
 			}
-			return value;
 		}
 
-		public int Solve2 (Game g)
+		public int Solve (Game g)
 		{
-			Console.WriteLine (queue.Count);
-
-			if (value < 0) {
-				value = g.gamePosition (position, c);
-				if (value >= 0) {
-					pn = (value - 1) * Int32.MaxValue;
-					return pn;
-				}
+			//Console.WriteLine (transposition.Count);
+			//Console.WriteLine (queue.Count);
+			// If this node is a terminal position return
+			if (value >= 0) {
+				pn = (value - 1) * Int32.MaxValue;
+				//Console.WriteLine("Terminal position with " + (c == 0 ? "white" : "black") + " to move: " + pn);
+				//Console.WriteLine(g.prettyPrint(position));
+				return pn;
 			}
-
-			if (children.Count == 0)
-				Expand2(g);
-
+			// If the children haven't been calculated yet expand this node
+			if (children == null) {
+				this.children = new List<INode> ();
+				Expand (g);
+			}
 
 			// Black is maximising (1) white is minimising (-1)
 			int sign = (2 * c) - 1;
 			int e = Int32.MaxValue * (c ^ 1);
+			//Console.WriteLine("Current e: " + e);
 			foreach (var child in children) {
-				var tchild = transposition[child];
-				//Console.WriteLine(tchild.pn);
-				e = sign * Math.Max (sign * tchild.pn, sign * e);
+				//Console.WriteLine("Child pn:  " + child.pn);
+				e = sign * Math.Max (sign * child.pn, sign * e);
+				//Console.WriteLine("New e:     " + e);
 			}
-			if (e == Int32.MaxValue * c) {
+			if (e != 1) {
+				foreach (var child in children)
+					transposition.Remove(child);
+				children = null;
 				pn = e;
-				Console.WriteLine(pn);
 				return pn;
 			}
+
+			// Enqueue unsolved children node for solving
 			foreach (var child in children) {
-				var tchild = transposition[child];
-				if (tchild.pn == 1) {
-					queue.Enqueue(tchild);
+				if (child.pn == 1) {
+					child.Enqueue ();
 				}
 			}
-			queue.Enqueue(this);
-			return pn;
-		}
 
-		public void show (Game g)
-		{
-			if (position [2 * Game.l].bits > 3 || position [2 * Game.l + 1].bits > 3)
-				Console.WriteLine (g.prettyPrint (position));
-			foreach (var child in children)
-				child.show (g);
+			// Enqeueu this node for solving
+			this.Enqueue ();
+			return pn;
 		}
 
 		public int Height ()
 		{
 			var maxHeight = 0;
-			foreach (var child in children)
-				maxHeight = Math.Max (maxHeight, child.Height ());
+			if (children != null)
+				foreach (var child in children)
+					maxHeight = Math.Max (maxHeight, child.Height ());
 			return maxHeight + 1;
 		}
 
 		public int Size ()
 		{
 			var size = 1;
-			foreach (var child in children)
-				size += child.Size ();
+			if (children != null)
+				foreach (var child in children)
+					size += child.Size ();
 			return size;
 		}
 
@@ -186,7 +159,7 @@ namespace smallshogi
 			var hash = 982451653;
 			foreach (BitBoard b in position)
 				hash = 997 * hash + (int)b.bits;
-			hash ^= c*2147483647;
+			hash ^= c * 2147483647;
 			return hash;
 		}
 
@@ -200,13 +173,14 @@ namespace smallshogi
 			return Equals (node);
 		}
 
-		public bool Equals (INode other) {
-			if(c != other.c)
+		public bool Equals (INode other)
+		{
+			if (c != other.c)
 				return false;
-			if(position.Length != other.position.Length)
+			if (position.Length != other.position.Length)
 				return false;
 			for (int i = 0; i < position.Length; ++i)
-				if(!position[i].Equals(other.position[i]))
+				if (!position [i].Equals (other.position [i]))
 					return false;
 			return true;
 		}

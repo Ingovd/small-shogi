@@ -50,61 +50,25 @@ namespace smallshogi
 			// Set up the initial board configuration
 			var white = new Dictionary<int, Type> ();
 			var black = new Dictionary<int, Type> ();
-			white [ 0] = Type.Bishop;
+			/*white [ 0] = Type.Bishop;
 			white [ 1] = Type.King;
 			white [ 2] = Type.Rook;
-			white [ 4] = Type.Pawn;
+			//white [ 4] = Type.Pawn;
 			black [ 9] = Type.Rook;
 			black [10] = Type.King;
-			black [11] = Type.Bishop;
-			black [ 7] = Type.Pawn;
-            /*white[0] = Type.King;
-            white[1] = Type.Gold;
-            white[2] = Type.Silver;
-            white[3] = Type.Bishop;
-            white[4] = Type.Rook;
-            white[5] = Type.Pawn;
-            black[24] = Type.King;
-            black[23] = Type.Gold;
-            black[22] = Type.Silver;
-            black[21] = Type.Bishop;
-            black[20] = Type.Rook;
-            black[19] = Type.Pawn;*/
+			black [11] = Type.Bishop;*/
+			//black [ 7] = Type.Pawn;
+            white[0] = Type.King;
+            white[1] = Type.Bishop;
+			white[2] = Type.Rook;
+            black[8] = Type.King;
+            black[7] = Type.Bishop;
+			black[6] = Type.Rook;
 
 
 			
-			Game g = new Game (white, black, 4, 3, 1, pieces);
-            //Game g = new Game(white, black, 5, 5, 1, pieces);
-
-			/*BitBoard[] position = g.startingPos;
-			int c = 0;
-			for(int i = 0; i < 10; ++i) {
-				var plies = g.children (position, c);
-                var player = c == 0 ? "White" : "Black";
-                System.Console.WriteLine(player + " has " + plies.Count + " moves.");
-                BitBoard[] last = null;
-                Ply lastPly = null;
-				foreach (var p in plies) {
-                    var newPos = p.apply(position);
-                    if (g.gamePosition(newPos) < 0)
-                    {
-                        last = newPos;
-                        lastPly = p;
-                    }
-				}
-                int j = lastPly.pieceMoved();
-                var s = Piece.showType(j < pieces.Length ? pieces[j].type : pieces[Game.demote[j]].ptype);
-                Console.WriteLine("Moving " + s);
-                System.Console.WriteLine(g.prettyPrint(last));
-                position = last;
-				c ^= 1;
-			}*/
-
-			/*var search = new AndOrSearch(g);
-			var sequence = search.Start();
-			string s = sequence.won == 1 ? "Black" : "White";
-			System.Console.WriteLine(s + " won after " + sequence.depth + " plies.");
-			sequence.show(g);*/
+			//Game g = new Game (white, black, 4, 3, 1, pieces);
+            Game g = new Game(white, black, 3, 3, 1, pieces);
 
 			var root = new INode(g.startingPos, 1);
 			Stopwatch sw = new Stopwatch();
@@ -112,18 +76,11 @@ namespace smallshogi
 			INode.BreadthFirst(root, g);
 			sw.Stop();
 			System.Console.WriteLine("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
-			System.Console.WriteLine("Number of nodes:   " + root.Size());
-			System.Console.WriteLine("Tree depth:        " + root.Height());
-			System.Console.WriteLine("Game value:        " + root.Solve (g, 1));
+			System.Console.WriteLine("Number of nodes:   " + INode.transposition.Count);
+			//System.Console.WriteLine("Tree depth:        " + root.Height());
+			System.Console.WriteLine("Game value:        " + root.pn);
 
-            foreach (var child in root.children)
-            {
-                System.Console.WriteLine(g.prettyPrint(child.position));
-                System.Console.WriteLine("Game value: " + child.value);
-            }
-
-
-            Console.Read();
+            //Console.Read();
 		}
 
         static void DisplayBitBoard(BitBoard BitBoard)

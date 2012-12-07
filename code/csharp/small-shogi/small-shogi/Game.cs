@@ -128,7 +128,7 @@ namespace smallshogi
 			}
 		}
 
-		// Returns a BitBoard for every legal move including captures, excluding promotion
+		// Returns a list of all possible plies
 		public List<Ply> children (BitBoard[] position, int c)
 		{
 			var plies = new List<Ply> ();

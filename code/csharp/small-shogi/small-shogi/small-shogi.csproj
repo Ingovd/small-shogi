@@ -44,8 +44,6 @@
     <Compile Include="ply\IPly.cs" />
     <Compile Include="ply\MovePly.cs" />
     <Compile Include="ply\DropPly.cs" />
-    <Compile Include="search\AndOrSearch.cs" />
-    <Compile Include="search\Node.cs" />
     <Compile Include="search\INode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
