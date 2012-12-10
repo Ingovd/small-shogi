@@ -33,7 +33,7 @@ namespace smallshogi
 			this.columns = columns;
 			this.pieces = pieces;
 
-			index = generateInitialSetup (white, black);
+			generateInitialSetup (white, black);
 			generateMoveSets ();
 
 			// Create the masks for both player's promotion zones
@@ -50,11 +50,10 @@ namespace smallshogi
 			promoMask [1] = blackPromo;
 		}
 
-		private Dictionary<Type, int> generateInitialSetup
-			(Dictionary<int, Type> white, Dictionary<int, Type> black)
+		private void generateInitialSetup (Dictionary<int, Type> white, Dictionary<int, Type> black)
 		{
 			// Find out which pieces can be promoted and assign an index to every piece type
-			var index = new Dictionary<Type, int> ();
+			index = new Dictionary<Type, int> ();
 			demote = new Dictionary<int, int> ();
 			promote = new Dictionary<int, int> ();
 			int promotedPieces = 0;
@@ -102,8 +101,6 @@ namespace smallshogi
 				}
 				handMask.Add (p, b);
 			}
-			// Return the map from piece Type to index
-			return index;
 		}
 
 		private void generateMoveSets ()

@@ -45,38 +45,39 @@ namespace smallshogi
             //var silver = new Piece(silverMoves, Type.Silver, tokinMoves, Type.PSilver);
             //var knight = new Piece(knightMoves, Type.Knight, tokinMoves, Type.PKnight);
             //var gold = new Piece(tokinMoves, Type.Gold);
-			Piece[] pieces = { king, bishop, rook, pawn };
+			Piece[] pieces = { king, bishop, rook };
 
 			// Set up the initial board configuration
 			var white = new Dictionary<int, Type> ();
 			var black = new Dictionary<int, Type> ();
-			/*white [ 0] = Type.Bishop;
+			white [ 0] = Type.Bishop;
 			white [ 1] = Type.King;
 			white [ 2] = Type.Rook;
 			//white [ 4] = Type.Pawn;
 			black [ 9] = Type.Rook;
 			black [10] = Type.King;
-			black [11] = Type.Bishop;*/
-			//black [ 7] = Type.Pawn;
-            white[0] = Type.King;
+			black [11] = Type.Bishop;
+			//black [ 7] = Type.Pawn;*/
+            /*white[0] = Type.King;
             white[1] = Type.Bishop;
 			white[2] = Type.Rook;
             black[8] = Type.King;
             black[7] = Type.Bishop;
-			black[6] = Type.Rook;
+			black[6] = Type.Rook;*/
 
 
 			
-			//Game g = new Game (white, black, 4, 3, 1, pieces);
-            Game g = new Game(white, black, 3, 3, 1, pieces);
+			Game g = new Game (white, black, 4, 3, 1, pieces);
+           // Game g = new Game(white, black, 3, 3, 1, pieces);
 
-			var root = new INode(g.startingPos, 1);
+			var root = new Node(g.startingPos, 1);
+			PNSearch pnSearch = new PNSearch();
 			Stopwatch sw = new Stopwatch();
 			sw.Start();
-			INode.BreadthFirst(root, g);
+			pnSearch.Search(root, g);
 			sw.Stop();
 			System.Console.WriteLine("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
-			System.Console.WriteLine("Number of nodes:   " + INode.transposition.Count);
+			//System.Console.WriteLine("Number of nodes:   " + INode.transposition.Count);
 			//System.Console.WriteLine("Tree depth:        " + root.Height());
 			System.Console.WriteLine("Game value:        " + root.pn);
 
