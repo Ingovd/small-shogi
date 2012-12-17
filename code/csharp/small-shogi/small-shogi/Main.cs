@@ -45,7 +45,7 @@ namespace smallshogi
             //var silver = new Piece(silverMoves, Type.Silver, tokinMoves, Type.PSilver);
             //var knight = new Piece(knightMoves, Type.Knight, tokinMoves, Type.PKnight);
             //var gold = new Piece(tokinMoves, Type.Gold);
-			Piece[] pieces = { king, bishop, rook };
+			Piece[] pieces = { king, bishop, rook, pawn };
 
 			// Set up the initial board configuration
 			var white = new Dictionary<int, Type> ();
@@ -64,11 +64,13 @@ namespace smallshogi
             black[8] = Type.King;
             black[7] = Type.Bishop;
 			black[6] = Type.Rook;*/
-
+			//white[0] = Type.King;
+			//black[5] = Type.King;
 
 			
 			Game g = new Game (white, black, 4, 3, 1, pieces);
-           // Game g = new Game(white, black, 3, 3, 1, pieces);
+            //Game g = new Game(white, black, 3, 3, 1, pieces);
+			//Game g = new Game (white, black, 3, 2, 1, pieces);
 
 			var root = new Node(g.startingPos, 1);
 			PNSearch pnSearch = new PNSearch();
@@ -77,9 +79,11 @@ namespace smallshogi
 			pnSearch.Search(root, g);
 			sw.Stop();
 			System.Console.WriteLine("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
-			//System.Console.WriteLine("Number of nodes:   " + INode.transposition.Count);
+			System.Console.WriteLine("Number of nodes:   " + root.Size ());
 			//System.Console.WriteLine("Tree depth:        " + root.Height());
 			System.Console.WriteLine("Game value:        " + root.pn);
+
+			//root.Show(g);
 
             //Console.Read();
 		}

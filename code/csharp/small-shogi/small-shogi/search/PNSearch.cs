@@ -22,12 +22,14 @@ namespace smallshogi
 				var mpn = MostProving(root);
 				mpn.Expand (g);
 				Node.InitiateVisiting ();
-				mpn.Update ();
-				if(count % 1000 == 0) {
+				mpn.StartUpdate ();
+				if(count % 10000 == 0) {
+					int size = root.Size();
 					Console.WriteLine(root.pn + " and " + root.dn);
 					Console.WriteLine("Transposition: " + Node.transposition.Count);
+					Console.WriteLine("Count:         " + size);
 				}
-				count++;
+ 				count++;
 			}
 			Console.WriteLine(root.pn + " and " + root.dn);
 			return root.pn;
@@ -91,11 +93,51 @@ namespace smallshogi
 			return this.marker == Node.visitMarker;
 		}
 
-		public void Update ()
+		public void Draw ()
 		{
+			pn = Int32.MaxValue;
+			dn = 0;
+			Node.InitiateVisiting ();
+			children = null;
+			foreach (var parent in parents)
+				parent.Update (null);
+		}
+
+		public void StartUpdate ()
+		{
+			UpdateNumbers ();
+
+			// Update parents
+			foreach (var parent in parents)
+				parent.Update (this);
+		}
+
+		public void Update (Node origin)
+		{
+			// Tree test, draw detected if true
+			if (origin != null && this.Equals (origin)) {
+				origin.Draw ();
+				return;
+			}
+
+			// DAG/DCG test, dont visit a node more than once
 			if(IsVisited ())
 				return;
 			SetVisit ();
+
+			UpdateNumbers ();
+
+			// Clear some memory maybe
+			//if(pn == 0 || dn == 0)
+			//	children = null;
+
+			// Update parents
+			foreach (var parent in parents)
+				parent.Update (origin);
+		}
+
+		public void UpdateNumbers ()
+		{
 			if (c == 1) {
 				int min = Int32.MaxValue;
 				int sum = 0;
@@ -121,15 +163,11 @@ namespace smallshogi
 				dn = min;
 				pn = sum;
 			}
-			//if(pn == 0 || dn == 0)
-			//	children = null;
-			foreach (var parent in parents)
-				parent.Update ();
 		}
 
 		public void Evaluate (Game g)
 		{
-			int pos = g.gamePosition (position);
+			int pos = g.gamePosition (position, c);
 			if (pos > 0) {
 				pn = -1*(pos - 2) * Int32.MaxValue;
 				dn =    (pos - 1) * Int32.MaxValue;
@@ -141,19 +179,41 @@ namespace smallshogi
 
 		public void Expand (Game g)
 		{
+			//if(children != null)
+			//	return;
 			children = new List<Node> ();
 			var plies = g.children (position, c);
 			foreach (var ply in plies) {
 				var s = new Node (ply, this, (byte)(c ^ 1));
-				if(transposition.ContainsKey(s))
+				s.Evaluate(g);
+				if(!transposition.ContainsKey(s))
+					transposition[s] = s;
+				/*if(transposition.ContainsKey(s))
 					s = (Node) transposition[s];
 				else {
 					s.Evaluate (g);
 					transposition[s] = s;
-				}
+				}*/
 				s.parents.Add(this);
 				children.Add (s);
 			}
+		}
+
+		public int Size ()
+		{
+			var size = 1;
+			if(children != null)
+				foreach(var child in children)
+					size += child.Size ();
+			return size;
+		}
+
+		public void Show (Game g)
+		{
+			Console.WriteLine(g.prettyPrint(position));
+			if(children != null)
+				foreach(var child in children)
+					child.Show(g);
 		}
 
 		public override int GetHashCode ()
@@ -169,6 +229,8 @@ namespace smallshogi
 		{
 			if (obj == null)
 				return false;
+			//if(System.Object.ReferenceEquals(this, obj))
+			//   return true;
 			Node node = obj as Node;
 			if (node == null)
 				return false;

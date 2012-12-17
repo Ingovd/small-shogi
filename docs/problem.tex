@@ -1,0 +1,9 @@
+\documentclass{article}
+\begin{document}
+
+Positions (board and hand) can and will occur more than once in the game tree. However as nodes in the tree these positions are not truely identical. In fact, a node is uniquely defined by its position and path to the root.\\
+When calculating game theoretical values of the nodes, the notion of identical positions in nodes can be useful to reduce computation time. We distinguish two types of identical positions, transpositions and repititions. Transpositions are important for reducing computation time, and reptitions for termination (as they lead to draw).\\
+Representing the game tree as a finite state machine with positions as states and plies as transitions results in a troublesome structure, namely a directed cyclic graph. During proof number search this structure is being traversed constantly, so cycles immediately pose a threat to the termination of the algorithm.\\
+The simple solution of representing the game tree as an actual tree has the obvious drawback of being very memory and computation time consuming.
+
+\end{document}
