@@ -18,16 +18,19 @@ namespace smallshogi
 			root.Evaluate(g);
 			int count = 0;
 			while (root.pn != 0 && root.dn != 0) {
-				Node.InitiateVisiting ();
 				var mpn = MostProving(root);
 				mpn.Expand (g);
 				Node.InitiateVisiting ();
-				mpn.StartUpdate ();
-				if(count % 10000 == 0) {
+				mpn.Update (null);
+				if(root.DetectDraw())
+					break;
+				if(count % 1 == 0) {
+					Node.InitiateVisiting ();
 					int size = root.Size();
 					Console.WriteLine(root.pn + " and " + root.dn);
 					Console.WriteLine("Transposition: " + Node.transposition.Count);
 					Console.WriteLine("Count:         " + size);
+					Console.WriteLine("Draw:          " + (root.DetectDraw() ? "True" : "False"));
 				}
  				count++;
 			}
@@ -37,6 +40,7 @@ namespace smallshogi
 
 		public Node MostProving (Node v)
 		{
+			Node.InitiateVisiting ();
 			while (v.children != null && !v.IsVisited ())
 				if (v.c == 1)
 					v = LeftmostNode (v, PN);
@@ -103,6 +107,37 @@ namespace smallshogi
 				parent.Update (null);
 		}
 
+		public bool DetectDraw ()
+		{
+			InitiateVisiting ();
+			return Drawn ();
+		}
+
+		public bool Drawn ()
+		{
+			// If this node has already been visited its a draw
+			if(IsVisited ())
+				return true;
+			SetVisit ();
+			// Check if this node is proven, return result
+			if(pn == 0 || dn == 0)
+				return pn > 0;
+			// Check if this is an unexpanded node, return no draw
+			if(children == null)
+				return false;
+			// Return draw value of children
+			if (c == 1) {
+				foreach (var child in children)
+					if (!child.Drawn ())
+						return false;
+				return true;
+			}
+			foreach (var child in children)
+				if (child.Drawn ())
+					return true;
+			return false;
+		}
+
 		public void StartUpdate ()
 		{
 			UpdateNumbers ();
@@ -115,10 +150,10 @@ namespace smallshogi
 		public void Update (Node origin)
 		{
 			// Tree test, draw detected if true
-			if (origin != null && this.Equals (origin)) {
+			/*if (origin != null && this.Equals (origin)) {
 				origin.Draw ();
 				return;
-			}
+			}*/
 
 			// DAG/DCG test, dont visit a node more than once
 			if(IsVisited ())
@@ -185,15 +220,15 @@ namespace smallshogi
 			var plies = g.children (position, c);
 			foreach (var ply in plies) {
 				var s = new Node (ply, this, (byte)(c ^ 1));
-				s.Evaluate(g);
+				/*s.Evaluate(g);
 				if(!transposition.ContainsKey(s))
-					transposition[s] = s;
-				/*if(transposition.ContainsKey(s))
+					transposition[s] = s;*/
+				if(transposition.ContainsKey(s))
 					s = (Node) transposition[s];
 				else {
 					s.Evaluate (g);
 					transposition[s] = s;
-				}*/
+				}
 				s.parents.Add(this);
 				children.Add (s);
 			}
@@ -201,6 +236,9 @@ namespace smallshogi
 
 		public int Size ()
 		{
+			if(IsVisited ())
+				return 0;
+			SetVisit ();
 			var size = 1;
 			if(children != null)
 				foreach(var child in children)

@@ -50,7 +50,7 @@ namespace smallshogi
 			// Set up the initial board configuration
 			var white = new Dictionary<int, Type> ();
 			var black = new Dictionary<int, Type> ();
-			white [ 0] = Type.Bishop;
+			/*white [ 0] = Type.Bishop;
 			white [ 1] = Type.King;
 			white [ 2] = Type.Rook;
 			//white [ 4] = Type.Pawn;
@@ -64,13 +64,13 @@ namespace smallshogi
             black[8] = Type.King;
             black[7] = Type.Bishop;
 			black[6] = Type.Rook;*/
-			//white[0] = Type.King;
-			//black[5] = Type.King;
+			white[0] = Type.King;
+			black[2] = Type.King;
 
 			
-			Game g = new Game (white, black, 4, 3, 1, pieces);
+			//Game g = new Game (white, black, 4, 3, 1, pieces);
             //Game g = new Game(white, black, 3, 3, 1, pieces);
-			//Game g = new Game (white, black, 3, 2, 1, pieces);
+			Game g = new Game (white, black, 5, 1, 1, pieces);
 
 			var root = new Node(g.startingPos, 1);
 			PNSearch pnSearch = new PNSearch();
