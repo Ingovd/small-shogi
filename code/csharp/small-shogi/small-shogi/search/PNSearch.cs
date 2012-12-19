@@ -115,7 +115,7 @@ namespace smallshogi
 
 		public bool Drawn ()
 		{
-			// If this node has already been visited its a draw
+			// If this node has already been visited its a draw INCORRECT
 			if(IsVisited ())
 				return true;
 			SetVisit ();
