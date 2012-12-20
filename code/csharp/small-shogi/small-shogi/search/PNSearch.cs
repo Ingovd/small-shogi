@@ -22,16 +22,18 @@ namespace smallshogi
 				mpn.Expand (g);
 				Node.InitiateVisiting ();
 				mpn.Update (null);
-				if(root.DetectDraw())
-					break;
-				if(count % 1 == 0) {
+				//if(root.DetectDraw())
+				//	break;
+				if(count % 100 == 0) {
 					Node.InitiateVisiting ();
 					int size = root.Size();
 					Console.WriteLine(root.pn + " and " + root.dn);
 					Console.WriteLine("Transposition: " + Node.transposition.Count);
 					Console.WriteLine("Count:         " + size);
-					Console.WriteLine("Draw:          " + (root.DetectDraw() ? "True" : "False"));
+					//Console.WriteLine("Draw:          " + (root.DetectDraw() ? "True" : "False"));
 				}
+				if(count >= 10000)
+					break;
  				count++;
 			}
 			Console.WriteLine(root.pn + " and " + root.dn);
@@ -64,6 +66,7 @@ namespace smallshogi
 		public BitBoard[] position;
 		public List<Node> children;
 		public List<Node> parents = new List<Node> ();
+		public Node previous;
 		public byte c;
 		public int pn, dn, marker;
 		static int visitMarker;
@@ -92,6 +95,11 @@ namespace smallshogi
 			this.marker = Node.visitMarker;
 		}
 
+		public void UnVisit ()
+		{
+			this.marker--;
+		}
+
 		public bool IsVisited ()
 		{
 			return this.marker == Node.visitMarker;
@@ -116,25 +124,26 @@ namespace smallshogi
 		public bool Drawn ()
 		{
 			// If this node has already been visited its a draw INCORRECT
-			if(IsVisited ())
+			if (IsVisited ())
 				return true;
 			SetVisit ();
 			// Check if this node is proven, return result
-			if(pn == 0 || dn == 0)
+			if (pn == 0 || dn == 0)
 				return pn > 0;
 			// Check if this is an unexpanded node, return no draw
-			if(children == null)
-				return false;
-			// Return draw value of children
-			if (c == 1) {
-				foreach (var child in children)
-					if (!child.Drawn ())
-						return false;
-				return true;
-			}
-			foreach (var child in children)
-				if (child.Drawn ())
+			if (children != null) {
+				// Return draw value of children
+				if (c == 1) {
+					foreach (var child in children)
+						if (!child.Drawn ())
+							return false;
 					return true;
+				}
+				foreach (var child in children)
+					if (child.Drawn ())
+						return true;
+			}
+			// Unvisit?
 			return false;
 		}
 
@@ -232,6 +241,32 @@ namespace smallshogi
 				s.parents.Add(this);
 				children.Add (s);
 			}
+		}
+
+		public Node GetCycle ()
+		{
+			InitiateVisiting ();
+			return Cycle ();
+		}
+
+		public Node Cycle ()
+		{
+			if (IsVisited ()) {
+				foreach (var parent in parents)
+					parent.children.Remove(this);
+				return this;
+			}
+			SetVisit ();
+			if (children != null)
+				foreach (var child in children) {
+					var end = child.Cycle ();
+					if (end != null) {
+						child.previous = this;
+						return end;
+					}
+				}
+			UnVisit ();
+			return null;
 		}
 
 		public int Size ()
