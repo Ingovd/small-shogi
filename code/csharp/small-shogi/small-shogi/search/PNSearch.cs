@@ -32,7 +32,7 @@ namespace smallshogi
 					Console.WriteLine("Count:         " + size);
 					//Console.WriteLine("Draw:          " + (root.DetectDraw() ? "True" : "False"));
 				}
-				if(count >= 10000)
+				if(count >= 1000000)
 					break;
  				count++;
 			}

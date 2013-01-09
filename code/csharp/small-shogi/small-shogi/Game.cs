@@ -247,6 +247,11 @@ namespace smallshogi
 				return 1 + c;
 			}
 
+            if (position[kingIndex].Subset(promoMask[0]))
+                return 1;
+            if (position[kingIndex + l].Subset(promoMask[1]))
+                return 2;
+
 			// This position is not terminal
 			return -1;
 		}
