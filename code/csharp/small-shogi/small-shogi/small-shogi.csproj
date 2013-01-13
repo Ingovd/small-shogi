@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -39,18 +39,14 @@
     <Compile Include="pieces\Piece.cs" />
     <Compile Include="pieces\Move.cs" />
     <Compile Include="Game.cs" />
-    <Compile Include="Board.cs" />
     <Compile Include="BitBoard.cs" />
     <Compile Include="ply\IPly.cs" />
     <Compile Include="ply\MovePly.cs" />
     <Compile Include="ply\DropPly.cs" />
-    <Compile Include="search\INode.cs" />
+    <Compile Include="search\BNode.cs" />
+    <Compile Include="search\Node.cs" />
     <Compile Include="search\PNSearch.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Folder Include="pieces\" />
-    <Folder Include="ply\" />
-    <Folder Include="search\" />
-  </ItemGroup>
+  <ItemGroup />
 </Project>

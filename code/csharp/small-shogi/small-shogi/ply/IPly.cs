@@ -2,12 +2,15 @@ using System;
 
 namespace smallshogi
 {
+    using Bits = System.UInt32;
+    using B = BitBoard;
+
 	public abstract class Ply
 	{
 		// Colour of moving player
 		protected int c;
 
-		public abstract BitBoard[] apply (BitBoard[] position);
+		public abstract Bits[] apply (Bits[] position);
 
 		public abstract int pieceMoved();
 

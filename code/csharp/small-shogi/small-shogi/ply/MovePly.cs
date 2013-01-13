@@ -2,6 +2,9 @@ using System;
 
 namespace smallshogi
 {
+    using Bits = System.UInt32;
+    using B = BitBoard;
+
 	public class MovePly : Ply
 	{
 		// Index piece moved and piece captured
@@ -9,8 +12,8 @@ namespace smallshogi
 		// Bool indicating whether this move leads to a promotion
 		bool promo = false;
 		// A bitboard for initial square and moved square
-		BitBoard square, move;
-		public MovePly (int c, int mI, BitBoard square, BitBoard move)
+		Bits square, move;
+		public MovePly (int c, int mI, Bits square, Bits move)
 		{
 			this.c = c;
 			this.mI = mI;
@@ -38,33 +41,33 @@ namespace smallshogi
 			this.cI = cI;
 		}
 
-		public override BitBoard[] apply (BitBoard[] position)
+		public override Bits[] apply (Bits[] position)
 		{
-			var result = new BitBoard[position.Length];
+			var result = new Bits[position.Length];
 			Array.Copy (position, result, position.Length);
 			// Remove the piece from initial position
 			var pI = pieceI (c, mI);
-			result [pI] = new BitBoard (result [pI]);
-			result [pI].Xor (square);
+			result [pI] = result [pI];
+            result[pI] ^= square;
 			// Put it on new position, possibly promoting
 			if (promo) {
 				var pPI = piecePI (c, mI);
-				result [pPI] = new BitBoard(result [pPI]);
-				result [pPI].Xor (move);
+				result [pPI] = result [pPI];
+				result [pPI] ^= move;
 			}
 			else
-				result [pieceI (c, mI)].Xor (move);
+				result [pieceI (c, mI)] ^= move;
 			// If a piece is captured update hand and enemy piece
 			if (cI >= 0) {
 				// Create copies of pieceEI and handI
 				var pEI = pieceEI (c, cI);
-				result [pEI] = new BitBoard(result [pEI]);
+				result [pEI] = result [pEI];
 				var hI = handI (c);
-				result[hI] = new BitBoard(result[hI]);
+				result[hI] = result[hI];
 				// Update the bitboards
-				result [pEI].Xor (move);
-				var mask = new BitBoard(Game.handMask[Game.demote[cI]]);
-				result[hI].PushMasked(mask);
+				result [pEI] ^= (move);
+				var mask = Game.handMask[Game.demote[cI]];
+				B.PushMasked(ref result[hI], mask);
 			}
 			return result;
 		}

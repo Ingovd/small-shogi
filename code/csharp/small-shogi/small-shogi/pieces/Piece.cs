@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace smallshogi
 {
+    using Bits = System.UInt32;
+    using B = BitBoard;
+
 	public enum Type
 	{
 		King,
@@ -71,32 +74,33 @@ namespace smallshogi
             }
 		}
 
-		public Dictionary<BitBoard, BitBoard> generateMoves (int files, int columns, bool p)
+		public Dictionary<Bits, Bits> generateMoves (int files, int columns, bool p)
 		{
-			var dic = new Dictionary<BitBoard, BitBoard> ();
+			var dic = new Dictionary<Bits, Bits> ();
 			List<Move> selectedMoves = p ? pmoves : moves;
 			if (selectedMoves == null)
 				return null;
 
 			for (int j = 0; j < files; ++j)
 				for (int i = 0; i < columns; ++i) {
-					var position = new BitBoard ();
-					position.Set (i + j * columns);
-					var moveBoard = new BitBoard ();
+					Bits position = 0;
+					B.Set (ref position, i + j * columns);
+					Bits moveBoard = 0;
 					foreach (Move m in selectedMoves) {
 						if (i + m.c < columns &&
 							i + m.c >= 0 &&
 							j + m.f < files &&
 							j + m.f >= 0)
-							moveBoard.Set (i + m.c + (j + m.f) * columns);
+							B.Set (ref moveBoard, i + m.c + (j + m.f) * columns);
 					}
-				/*Console.WriteLine(Piece.showType (p ? ptype : type));
-				Console.WriteLine(position.ToString(3, 12));
+				Console.WriteLine(Piece.showType (p ? ptype : type));
+                Console.WriteLine(B.ToString(position, 3, 12));
 				Console.WriteLine("---");
-				Console.WriteLine(moveBoard.ToString(3, 12));*/
-					dic.Add (position, moveBoard);
+                Console.WriteLine(B.ToString(moveBoard, 3, 12));
+                    try { dic.Add(position, moveBoard); }
+                    catch (ArgumentException e) { System.Console.WriteLine("Adding {0} {1}", position, moveBoard); }
 				}
-			dic.Add (new BitBoard (), new BitBoard ());
+			dic.Add (0, 0);
 			return dic;
 		}
 

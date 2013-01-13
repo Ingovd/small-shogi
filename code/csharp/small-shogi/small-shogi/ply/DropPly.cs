@@ -2,32 +2,34 @@ using System;
 
 namespace smallshogi
 {
+    using Bits = System.UInt32;
+    using B = BitBoard;
+
 	public class DropPly : Ply
 	{
 		// Index of dropped piece
 		int dI;
 		// Bitboard specifying where the piece is dropped
-		BitBoard location;
-		public DropPly (int c, int dI, BitBoard location)
+		Bits location;
+		public DropPly (int c, int dI, Bits location)
 		{
 			this.c = c;
 			this.dI = dI;
 			this.location = location;
 		}
 
-		public override BitBoard[] apply (BitBoard[] position)
+		public override Bits[] apply (Bits[] position)
 		{
-			var result = new BitBoard[position.Length];
+			var result = new Bits[position.Length];
 			Array.Copy (position, result, position.Length);
 			// Drop the piece in question
 			var pI = pieceI  (c, dI);
-			result [pI] = new BitBoard(result [pI]);
-			result [pI].Xor (location);
+			result [pI] ^= location;
 			// Remove the piece from the player's hand
-			var mask = new BitBoard(Game.handMask[dI]);
+			Bits mask = Game.handMask[dI];
 			var hI = handI (c);
-			result[hI] = new BitBoard(result[hI]);
-			result[hI].PopMasked(mask);
+			result[hI] = result[hI];
+			B.PopMasked(ref result[hI], mask);
 
 			return result;
 		}
