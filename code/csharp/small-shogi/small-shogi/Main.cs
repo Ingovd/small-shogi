@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using smallshogi.search;
 
 namespace smallshogi
 {
@@ -50,7 +51,7 @@ namespace smallshogi
 			// Set up the initial board configuration
 			var white = new Dictionary<int, Type> ();
 			var black = new Dictionary<int, Type> ();
-			white [ 0] = Type.Bishop;
+			/*white [ 0] = Type.Bishop;
 			white [ 1] = Type.King;
 			white [ 2] = Type.Rook;
 			//white [ 4] = Type.Pawn;
@@ -58,21 +59,21 @@ namespace smallshogi
 			black [10] = Type.King;
 			black [11] = Type.Bishop;
 			//black [ 7] = Type.Pawn;*/
-			/*white[0] = Type.King;
+			white[0] = Type.King;
             white[1] = Type.Bishop;
 			white[2] = Type.Rook;
             black[8] = Type.King;
             black[7] = Type.Bishop;
-			black[6] = Type.Rook;*/
+			black[6] = Type.Rook;
 			//white [0] = Type.King;
 			//black [4] = Type.King;
 
 			
-			Game g = new Game (white, black, 4, 3, 1, pieces);
-			//Game g = new Game (white, black, 3, 3, 1, pieces);
+			//Game g = new Game (white, black, 4, 3, 1, pieces);
+			Game g = new Game (white, black, 3, 3, 1, pieces);
 			//Game g = new Game (white, black, 5, 1, 1, pieces);
 
-			var root = new Node (g.startingPos, 1);
+			/*var root = new Node (g.startingPos, 1);
 			PNSearch pnSearch = new PNSearch ();
 			Stopwatch sw = new Stopwatch ();
 			sw.Start ();
@@ -81,23 +82,14 @@ namespace smallshogi
 			System.Console.WriteLine ("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
 			System.Console.WriteLine ("Number of nodes:   " + root.Size ());
 			//System.Console.WriteLine("Tree depth:        " + root.Height());
-			System.Console.WriteLine ("Game value:        " + root.pn);
+			System.Console.WriteLine ("Game value:        " + root.pn);*/
 
-			Node end, temp;
-			while ((end = root.GetCycle ()) != null) {
-				Console.WriteLine("Start of a cycle");
-				while (end != null) {
-					Console.WriteLine(g.prettyPrint(end.position));
-					temp = end.previous;
-					end.previous = null;
-					end = temp;
-				}
-				Console.WriteLine("End of a cycle");
-			}
-
-			//root.Show(g);
-
-            //Console.Read();
+			var root = new BNode (g.startingPos, 1);
+			BNode.Prove (root, g);
+			//root.Browse(g);
+			var bestGame = root.DFSearch(g, root.value);
+			foreach(var node in bestGame)
+				Console.WriteLine(g.prettyPrint(node.position));
 		}
 
         static void DisplayBitBoard(BitBoard BitBoard)

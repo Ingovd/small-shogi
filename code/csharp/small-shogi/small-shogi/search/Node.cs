@@ -106,12 +106,6 @@ namespace smallshogi
 
         public void Update(Node origin)
         {
-            // Tree test, draw detected if true
-            /*if (origin != null && this.Equals (origin)) {
-                origin.Draw ();
-                return;
-            }*/
-
             // DAG/DCG test, dont visit a node more than once
             if (IsVisited())
                 return;
@@ -130,6 +124,9 @@ namespace smallshogi
 
         public void UpdateNumbers()
         {
+			if(children == null)
+				return;
+
             if (c == 1)
             {
                 int min = Int32.MaxValue;

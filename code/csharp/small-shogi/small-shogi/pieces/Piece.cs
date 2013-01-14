@@ -93,12 +93,11 @@ namespace smallshogi
 							j + m.f >= 0)
 							B.Set (ref moveBoard, i + m.c + (j + m.f) * columns);
 					}
-				Console.WriteLine(Piece.showType (p ? ptype : type));
+				/*Console.WriteLine(Piece.showType (p ? ptype : type));
                 Console.WriteLine(B.ToString(position, 3, 12));
 				Console.WriteLine("---");
-                Console.WriteLine(B.ToString(moveBoard, 3, 12));
-                    try { dic.Add(position, moveBoard); }
-                    catch (ArgumentException e) { System.Console.WriteLine("Adding {0} {1}", position, moveBoard); }
+                Console.WriteLine(B.ToString(moveBoard, 3, 12));*/
+                    dic.Add(position, moveBoard);
 				}
 			dic.Add (0, 0);
 			return dic;

@@ -19,11 +19,8 @@ namespace smallshogi
 			int count = 0;
 			while (root.pn != 0 && root.dn != 0) {
 				var mpn = MostProving(root);
-                if (mpn.Expand(g))
-                {
-                    Node.InitiateVisiting();
-                    mpn.Update(null);
-                }
+                Node.InitiateVisiting();
+                mpn.Update(null);
 				//if(root.DetectDraw())
 				//	break;
 				if(count % 100 == 0) {
