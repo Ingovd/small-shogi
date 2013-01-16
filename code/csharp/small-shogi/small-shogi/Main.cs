@@ -10,47 +10,7 @@ namespace smallshogi
 	{
 		public static void Main (string[] args)
 		{
-			//System.Console.BufferHeight = 500;
-			// Define moves
-			var ul = new Move (-1, -1);
-			var u = new Move (0, -1);
-			var ur = new Move (1, -1);
-			var l = new Move (-1, 0);
-			var r = new Move (1, 0);
-			var dl = new Move (-1, 1);
-			var d = new Move (0, 1);
-			var dr = new Move (1, 1);
-			//var nl = new Move(-1, -2);
-			//var nr = new Move(1, -2);
-			// Define moves per piece
-			Move[] kingArray = {ul, u, ur, l, r, dl, d, dr};
-			Move[] bishopArray = {ul, ur, dl, dr};
-			Move[] rookArray = {u, l, r, d};
-			Move[] pawnArray = {d};
-			Move[] tokinArray = {ul, u, ur, l, r, d};
-			// Move[] silverArray = {ul, u, ur, dr, dl};
-			//Move[] knightArray = { nr, nl };
-			var kingMoves = new List<Move> (kingArray);
-			var bishopMoves = new List<Move> (bishopArray);
-			var rookMoves = new List<Move> (rookArray);
-			var pawnMoves = new List<Move> (pawnArray);
-			var tokinMoves = new List<Move> (tokinArray);
-			// var silverMoves = new List<Move>(silverArray);
-			//var knightMoves = new List<Move>(knightArray);
-
-			// Instantiate the Piece objects
-			var king = new Piece (kingMoves, Type.King);
-			var bishop = new Piece (bishopMoves, Type.Bishop);
-			var rook = new Piece (rookMoves, Type.Rook);
-			var pawn = new Piece (pawnMoves, Type.Pawn, tokinMoves, Type.Tokin);
-			//var silver = new Piece(silverMoves, Type.Silver, tokinMoves, Type.PSilver);
-			//var knight = new Piece(knightMoves, Type.Knight, tokinMoves, Type.PKnight);
-			//var gold = new Piece(tokinMoves, Type.Gold);
-			Piece[] pieces = { king, bishop, rook, pawn };
-
-			// Set up the initial board configuration
-			var white = new Dictionary<int, Type> ();
-			var black = new Dictionary<int, Type> ();
+			//Game g = new Game (white, black, 4, 3, 1, pieces);
 			/*white [ 0] = Type.Bishop;
 			white [ 1] = Type.King;
 			white [ 2] = Type.Rook;
@@ -59,19 +19,22 @@ namespace smallshogi
 			black [10] = Type.King;
 			black [11] = Type.Bishop;
 			//black [ 7] = Type.Pawn;*/
-			white[0] = Type.King;
-            white[1] = Type.Bishop;
-			white[2] = Type.Rook;
-            black[8] = Type.King;
-            black[7] = Type.Bishop;
-			black[6] = Type.Rook;
-			//white [0] = Type.King;
-			//black [4] = Type.King;
 
+			/*GameSetup setup = new GameSetup (3, 3);
+			setup.SetPromotionRanks (1);
+			setup.AddWhitePiece (0, 0, Type.King);
+			setup.AddWhitePiece (1, 0, Type.Bishop);
+			setup.AddWhitePiece (2, 0, Type.Rook);
+			setup.AddBlackPiece (0, 2, Type.Rook);
+			setup.AddBlackPiece (1, 2, Type.Bishop);
+			setup.AddBlackPiece (2, 2, Type.King);
+			Game g = new Game (setup);*/
 			
-			//Game g = new Game (white, black, 4, 3, 1, pieces);
-			Game g = new Game (white, black, 3, 3, 1, pieces);
-			//Game g = new Game (white, black, 5, 1, 1, pieces);
+			//GameSetup setup =  new GameSetup(5, 1);
+			//setup.SetPromotionRanks(1);
+			//setup.AddWhitePiece(0,0, Type.King);
+			//setup.AddBlackPiece(5,0, Type.King);
+			//Game g = new Game (setup);
 
 			/*var root = new Node (g.startingPos, 1);
 			PNSearch pnSearch = new PNSearch ();
@@ -84,12 +47,28 @@ namespace smallshogi
 			//System.Console.WriteLine("Tree depth:        " + root.Height());
 			System.Console.WriteLine ("Game value:        " + root.pn);*/
 
-			var root = new BNode (g.startingPos, 1);
+			/*var root = new BNode (g.startingPos, 1);
 			BNode.Prove (root, g);
 			//root.Browse(g);
 			var bestGame = root.DFSearch(g, root.value);
 			foreach(var node in bestGame)
 				Console.WriteLine(g.prettyPrint(node.position));
+			root.Browse (g);*/
+
+			GameSetup setup;
+			Game g;
+			BNode root;
+			for (int i = 0; i < 1372; i++) {
+				setup = new GameSetup (i);
+				g = new Game(setup);
+				root = new BNode (g.startingPos, 1);
+				if(g.gamePosition(root.position, 1) < 0) {
+					BNode.Prove (root, g);
+					var bestGame = root.DFSearch(g, root.value);
+					foreach(var node in bestGame)
+						Console.WriteLine(g.prettyPrint(node.position));
+				}
+			}
 		}
 
         static void DisplayBitBoard(BitBoard BitBoard)

@@ -140,5 +140,50 @@ namespace smallshogi
 				return "?";
 			}
 		}
+		// Define moves
+		static Move ul = new Move (-1, -1);
+		static Move u = new Move (0, -1);
+		static Move ur = new Move (1, -1);
+		static Move l = new Move (-1, 0);
+		static Move r = new Move (1, 0);
+		static Move dl = new Move (-1, 1);
+		static Move d = new Move (0, 1);
+		static Move dr = new Move (1, 1);
+		static Move nl = new Move(-1, -2);
+		static Move nr = new Move(1, -2);
+		// Define moves per piece
+		static Move[] kingArray = {ul, u, ur, l, r, dl, d, dr};
+		static Move[] bishopArray = {ul, ur, dl, dr};
+		static Move[] rookArray = {u, l, r, d};
+		static Move[] pawnArray = {d};
+		static Move[] tokinArray = {ul, u, ur, l, r, d};
+		static Move[] silverArray = {ul, u, ur, dr, dl};
+		static Move[] knightArray = { nr, nl };
+		static List<Move> kingMoves = new List<Move> (kingArray);
+		static List<Move> bishopMoves = new List<Move> (bishopArray);
+		static List<Move> rookMoves = new List<Move> (rookArray);
+		static List<Move> pawnMoves = new List<Move> (pawnArray);
+		static List<Move> tokinMoves = new List<Move> (tokinArray);
+		static List<Move> silverMoves = new List<Move>(silverArray);
+		static List<Move> knightMoves = new List<Move>(knightArray);
+		// Instantiate the Piece objects
+		public static Piece king = new Piece (kingMoves, Type.King);
+		public static Piece  bishop = new Piece (bishopMoves, Type.Bishop);
+		public static Piece  rook = new Piece (rookMoves, Type.Rook);
+		public static Piece  pawn = new Piece (pawnMoves, Type.Pawn, tokinMoves, Type.Tokin);
+		public static Piece  silver = new Piece(silverMoves, Type.Silver, tokinMoves, Type.PSilver);
+		public static Piece  knight = new Piece(knightMoves, Type.Knight, tokinMoves, Type.PKnight);
+		public static Piece  gold = new Piece(tokinMoves, Type.Gold);
+		// Convienence map from type to piece
+		public static Dictionary<Type, Piece> getObject = new Dictionary<Type, Piece> ()
+		{
+			{Type.King, king},
+			{Type.Bishop, bishop},
+			{Type.Rook, rook},
+			{Type.Pawn, pawn},
+			{Type.Silver, silver},
+			{Type.Gold, gold},
+			{Type.Knight, knight}
+		};
 	}
 }

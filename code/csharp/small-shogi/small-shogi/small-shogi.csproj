@@ -46,6 +46,7 @@
     <Compile Include="search\BNode.cs" />
     <Compile Include="search\Node.cs" />
     <Compile Include="search\PNSearch.cs" />
+    <Compile Include="GameSetup.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup />

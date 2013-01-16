@@ -46,7 +46,7 @@ namespace smallshogi.search
 					InitiateVisiting();
 	                next.Update(g);
 
-					if(count % 10000 == 0) {
+					if(count % 1000 == 0) {
 						Console.WriteLine("Value:         " + n.value);
 						Console.WriteLine("Transposition: " + BNode.transposition.Count);
 						Console.WriteLine("Queue:         " + BNode.queue.Count);
@@ -180,7 +180,7 @@ namespace smallshogi.search
 		{
 			Console.WriteLine ("Current position with {0} to move:", c == 1 ? "Black" : "White");
 			Console.WriteLine (g.prettyPrint (position));
-			Console.WriteLine ("{0} wins", value==1?"Black":value==-1?"White":"Nobody");
+			Console.WriteLine ("{0} wins", value == 1 ? "Black" : value == -1 ? "White" : "Nobody");
 			Console.WriteLine ("{0} possible moves:", children.Count);
 			foreach (var child in children) {
 				Console.WriteLine (g.prettyPrint (child.position));
@@ -191,14 +191,23 @@ namespace smallshogi.search
 			}
 			var input = Console.ReadLine ();
 			if (input.StartsWith ("c")) {
-				input = input.Substring(1);
-				int i = Int32.Parse(input);
-				children[i-1].Browse (g);
+				input = input.Substring (1);
+				int i = Int32.Parse (input);
+				children [i - 1].Browse (g);
 			}
 			if (input.StartsWith ("p")) {
-				input = input.Substring(1);
-				int i = Int32.Parse(input);
-				parents[i-1].Browse (g);
+				input = input.Substring (1);
+				int i = Int32.Parse (input);
+				parents [i - 1].Browse (g);
+			}
+			if (input.StartsWith ("m")) {
+	            var plies = g.children(position, c);
+	            foreach (var ply in plies)
+	            {
+	                var s = new BNode(ply, this, (byte)(c ^ 1));
+					Console.WriteLine(g.prettyPrint(s.position));
+	            }
+				Browse (g);
 			}
 		}
 

@@ -32,6 +32,17 @@ namespace smallshogi
 		public Game (Dictionary<int, Type> white, Dictionary<int, Type> black,
 		             int files, int columns, int promo, Piece[] pieces)
 		{
+			Initialise (white, black, files, columns, promo, pieces);
+		}
+
+		public Game (GameSetup setup)
+		{
+			Initialise(setup.white, setup.black, setup.files, setup.columns, setup.promo, setup.Pieces());
+		}
+
+		private void Initialise (Dictionary<int, Type> white, Dictionary<int, Type> black,
+		             int files, int columns, int promo, Piece[] pieces)
+		{
 			this.files = files;
 			this.columns = columns;
 			this.pieces = pieces;
@@ -125,6 +136,8 @@ namespace smallshogi
 				// Promoted moveset black
 				if (p.ptype != Type.None)
 					moveSets.Add (index [p.ptype] + l, p.generateMoves (files, columns, true));
+				// Reset moves of this piece
+				p.switchSide ();
 			}
 		}
 
@@ -134,7 +147,7 @@ namespace smallshogi
 			var plies = new List<Ply> ();
 
 			// Calculate all squares not occupied by pieces of colour c
-			var notCPieces = ~colourPieces (position, c);
+			var notCPieces = (~colourPieces (position, c)) & (uint)((1 << files*columns) - 1);
 			// Calculate all squares occupied by pieces of colour (c ^ 1)
 			var enemyPieces = colourPieces (position, (c ^ 1));
 
@@ -170,9 +183,12 @@ namespace smallshogi
 					// Check if the player has this piece
                     if (B.Overlaps(hand, pieceMask.Value))
 						// Calculate all positions where it can be dropped
-						foreach (Bits square in B.allOnes(hand & all))
+						foreach (Bits square in B.allOnes(all)) {
+						if(square > 256)
+							Console.WriteLine("Wtf???");
 							// Add a drop ply for each possible drop
 							plies.Add (new DropPly (c, pieceMask.Key, square));
+					}
 				}
 			}
 			// Return all possible plies
@@ -334,6 +350,18 @@ namespace smallshogi
 
 			return s;
 		}
+
+        static void DisplayBits(Bits bits)
+        {
+            for (int i = 0; i < 32; i++)
+            {
+				if(i % 3 == 0 && i != 0)
+					Console.WriteLine();
+                bool bit = B.Get(bits, i);
+                Console.Write(bit ? 1 : 0);
+            }
+            Console.WriteLine();
+        }
 	}
 }
 
