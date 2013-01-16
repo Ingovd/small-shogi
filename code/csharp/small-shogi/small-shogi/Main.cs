@@ -64,9 +64,11 @@ namespace smallshogi
 				root = new BNode (g.startingPos, 1);
 				if(g.gamePosition(root.position, 1) < 0) {
 					BNode.Prove (root, g);
-					var bestGame = root.DFSearch(g, root.value);
+                    Console.WriteLine(root.WinningStrategySize());
+                    var bestGame = root.GetLongestGame(g);
 					foreach(var node in bestGame)
 						Console.WriteLine(g.prettyPrint(node.position));
+                    BNode.Reset();
 				}
 			}
 		}

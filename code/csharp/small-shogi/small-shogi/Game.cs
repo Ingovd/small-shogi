@@ -184,8 +184,6 @@ namespace smallshogi
                     if (B.Overlaps(hand, pieceMask.Value))
 						// Calculate all positions where it can be dropped
 						foreach (Bits square in B.allOnes(all)) {
-						if(square > 256)
-							Console.WriteLine("Wtf???");
 							// Add a drop ply for each possible drop
 							plies.Add (new DropPly (c, pieceMask.Key, square));
 					}

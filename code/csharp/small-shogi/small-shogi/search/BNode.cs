@@ -32,6 +32,12 @@ namespace smallshogi.search
             c = colour;
         }
 
+        public static void Reset()
+        {
+            transposition.Clear();
+            queue.Clear();
+        }
+
         public static BNode Prove(BNode n, Game g)
         {
 			transposition[n] = n;
@@ -152,29 +158,60 @@ namespace smallshogi.search
             return this.marker == BNode.visitMarker;
         }
 
-		public List<BNode> DFSearch (Game g, int win)
+        public List<BNode> GetLongestGame(Game g)
+        {
+            InitiateVisiting();
+            return DFSearch(g, value, 0);
+        }
+
+		public List<BNode> DFSearch (Game g, int win, int depth)
 		{
 			if (IsVisited ())
 				return null;
 
 			SetVisit();
 			int sign = win * (- 2 * c + 1);
+            sign = 1;
 			List<BNode> temp = new List<BNode> ();
 			List<BNode> best = new List<BNode> ();
 			int bestL = - sign * int.MaxValue;
 			foreach (var child in children)
 				if (child.value == win) {
-				temp = child.DFSearch(g, win);
+				temp = child.DFSearch(g, win, depth+1);
 				if(temp != null && sign * temp.Count > sign * bestL) {
 					best = temp;
 					bestL = best.Count;
 					}
 				}
-
 			best.Add(this);
 			UnVisit();
 			return best;
 		}
+
+        public int WinningStrategySize()
+        {
+            InitiateVisiting();
+            int size = Size(value);
+            Console.WriteLine(test);
+            return size;
+        }
+
+        static int test = 0;
+        private int Size(int win)
+        {
+            if (IsVisited())
+            {
+                test++;
+                return 0;
+            }
+
+            SetVisit();
+            int size = 1;
+            foreach (var child in children)
+                if (child.value == win)
+                    size += child.Size(win);
+            return size;
+        }
 
 		public void Browse (Game g)
 		{
