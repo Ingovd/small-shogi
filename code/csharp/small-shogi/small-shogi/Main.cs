@@ -36,16 +36,22 @@ namespace smallshogi
 			//setup.AddBlackPiece(5,0, Type.King);
 			//Game g = new Game (setup);
 
-			/*var root = new Node (g.startingPos, 1);
+			int start = 4;
+
+			Game g = new Game(new GameSetup(start));
+			var root = new Node (g.startingPos, 1);
 			PNSearch pnSearch = new PNSearch ();
 			Stopwatch sw = new Stopwatch ();
 			sw.Start ();
 			pnSearch.Search (root, g);
 			sw.Stop ();
 			System.Console.WriteLine ("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
-			System.Console.WriteLine ("Number of nodes:   " + root.Size ());
+			System.Console.WriteLine ("Number of nodes:   " + Node.transposition.Count);
 			//System.Console.WriteLine("Tree depth:        " + root.Height());
-			System.Console.WriteLine ("Game value:        " + root.pn);*/
+			System.Console.WriteLine ("Game value:        " + (root.pn==0?1:-1));
+			var bestGame = root.GetLongestGame(g);
+					foreach(var node in bestGame)
+						Console.WriteLine(g.prettyPrint(node.position));
 
 			/*var root = new BNode (g.startingPos, 1);
 			BNode.Prove (root, g);
@@ -56,33 +62,25 @@ namespace smallshogi
 			root.Browse (g);*/
 
 			GameSetup setup;
-			Game g;
-			BNode root;
-			for (int i = 0; i < 1372; i++) {
+			Game g2;
+			BNode root2;
+			int[] wins = new int[3];
+			for (int i = start; i < 1372; i++) {
 				setup = new GameSetup (i);
-				g = new Game(setup);
-				root = new BNode (g.startingPos, 1);
-				if(g.gamePosition(root.position, 1) < 0) {
-					BNode.Prove (root, g);
-                    Console.WriteLine(root.WinningStrategySize());
-                    var bestGame = root.GetLongestGame(g);
-					foreach(var node in bestGame)
-						Console.WriteLine(g.prettyPrint(node.position));
-                    BNode.Reset();
+				g2 = new Game(setup);
+				root2 = new BNode (g2.startingPos, 1);
+				if(g2.gamePosition(root2.position, 1) < 0) {
+					BNode.Prove (root2, g2);
+                    //Console.WriteLine(root2.WinningStrategySize());
+					//root2.Browse	(g2);
+                    var bestGame2 = root2.GetLongestGame(g2);
+					foreach(var node in bestGame2)
+						Console.WriteLine(g2.prettyPrint(node.position));
+					wins[root2.value+1]++;
+					Console.WriteLine("Black: {0}\nWhite: {1}\nNone:  {2}",wins[2], wins[0], wins[1]);
+					BNode.Reset();
 				}
 			}
 		}
-
-        static void DisplayBitBoard(BitBoard BitBoard)
-        {
-            for (int i = 0; i < 32; i++)
-            {
-				if(i % 3 == 0 && i != 0)
-					Console.WriteLine();
-                bool bit = BitBoard.Get(i);
-                Console.Write(bit ? 1 : 0);
-            }
-            Console.WriteLine();
-        }
 	}
 }

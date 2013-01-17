@@ -16,16 +16,16 @@ namespace smallshogi
 		// A list of pieces used for move generation
 		Piece[] pieces; 
 		// Map from piece type to piece index
-		public static Dictionary<Type, int> index;
+		public Dictionary<Type, int> index;
 		// Attack boards for pieces
-        public static Dictionary<int, Dictionary<Bits, Bits>> moveSets;
+        public Dictionary<int, Dictionary<Bits, Bits>> moveSets;
 		// Number of movesets (pieces + promoted pieces)
-		public static int l;
+		public int l;
 		// Map from piece moveset index to hand mask
-        public static Dictionary<int, Bits> handMask;
+        public Dictionary<int, Bits> handMask;
 		// Map from piece moveset index to unpromoted moveset index and vv
-		public static Dictionary<int, int> demote;
-		public static Dictionary<int, int> promote;
+		public Dictionary<int, int> demote;
+		public Dictionary<int, int> promote;
 		// Promotion masks for both players
         Bits[] promoMask;
 
@@ -83,7 +83,7 @@ namespace smallshogi
 					promotedPieces++;
 				}
 			}
-			// Set global parameter for easy access
+			// Set parameter for easy access
 			l = index.Count;
 
 			// Instantiate all the BitBoards for the initial setup
@@ -283,14 +283,19 @@ namespace smallshogi
 			return true;
 		}
 
-		// Hashfunction for positions including player to move
-		public int hashPosition (BitBoard[] position, int c)
+		public int PromotedIndex (int c, int i)
 		{
-			var hash = 982451653;
-			foreach (BitBoard b in position)
-				hash = 31 * hash + (int)b.bits;
-			hash ^= c*2147483647 ;
-			return hash;
+			return promote[i] + c * l;
+		}
+
+		public int HandIndex (int c)
+		{
+			return 2 * l + c;
+		}
+
+		public int PieceIndex (int c, int i)
+		{
+			return i + c * l;
 		}
 
 		public string prettyPrint (Bits[] position)

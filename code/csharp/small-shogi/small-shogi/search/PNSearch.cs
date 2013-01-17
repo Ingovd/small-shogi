@@ -20,16 +20,13 @@ namespace smallshogi
 			while (root.pn != 0 && root.dn != 0) {
 				var mpn = MostProving(root);
                 Node.InitiateVisiting();
-                mpn.Update(null);
-				//if(root.DetectDraw())
-				//	break;
+                mpn.Expand(g);
+				Node.InitiateVisiting();
+				mpn.Update ();
 				if(count % 100 == 0) {
 					Node.InitiateVisiting ();
-					int size = root.Size();
 					Console.WriteLine(root.pn + " and " + root.dn);
 					Console.WriteLine("Transposition: " + Node.transposition.Count);
-					//Console.WriteLine("Count:         " + size);
-					//Console.WriteLine("Draw:          " + (root.DetectDraw() ? "True" : "False"));
 				}
 				if(count >= 1000000)
 					break;

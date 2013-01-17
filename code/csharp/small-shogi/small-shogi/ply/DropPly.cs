@@ -7,36 +7,39 @@ namespace smallshogi
 
 	public class DropPly : Ply
 	{
-		// Index of dropped piece
-		int dI;
+		// Index of dropped piece unadjusted for colour
+		int dropIndex;
 		// Bitboard specifying where the piece is dropped
 		Bits location;
-		public DropPly (int c, int dI, Bits location)
+		public DropPly (int c, int dropIndex, Bits location)
 		{
 			this.c = c;
-			this.dI = dI;
+			this.dropIndex = dropIndex;
 			this.location = location;
 		}
 
-		public override Bits[] apply (Bits[] position)
+
+		public override Bits[] Apply (Bits[] position, Game g)
 		{
+			//Create a new set of bits
 			var result = new Bits[position.Length];
 			Array.Copy (position, result, position.Length);
-			// Drop the piece in question
-			var pI = pieceI  (c, dI);
-			result [pI] ^= location;
+
+			// Drop the piece in question by setting the location bit
+			result [g.PieceIndex  (c, dropIndex)] |= location;
+
 			// Remove the piece from the player's hand
-			Bits mask = Game.handMask[dI];
-			var hI = handI (c);
-			result[hI] = result[hI];
-			B.PopMasked(ref result[hI], mask);
+			Bits mask = g.handMask[dropIndex];
+			var handIndex = g.HandIndex (c);
+			result[handIndex] = result[handIndex];
+			B.PopMasked(ref result[handIndex], mask);
 
 			return result;
 		}
 
-		public override int pieceMoved ()
+		public override int PieceMoved ()
 		{
-			return dI;
+			return dropIndex;
 		}
 	}
 }

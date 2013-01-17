@@ -41,38 +41,38 @@ namespace smallshogi
 			this.cI = cI;
 		}
 
-		public override Bits[] apply (Bits[] position)
+		public override Bits[] Apply (Bits[] position, Game g)
 		{
 			var result = new Bits[position.Length];
 			Array.Copy (position, result, position.Length);
 			// Remove the piece from initial position
-			var pI = pieceI (c, mI);
+			var pI = g.PieceIndex (c, mI);
 			result [pI] = result [pI];
             result[pI] ^= square;
 			// Put it on new position, possibly promoting
 			if (promo) {
-				var pPI = piecePI (c, mI);
+				var pPI = g.PromotedIndex (c, mI);
 				result [pPI] = result [pPI];
 				result [pPI] ^= move;
 			}
 			else
-				result [pieceI (c, mI)] ^= move;
+				result [g.PieceIndex (c, mI)] ^= move;
 			// If a piece is captured update hand and enemy piece
 			if (cI >= 0) {
 				// Create copies of pieceEI and handI
-				var pEI = pieceEI (c, cI);
+				var pEI = g.PieceIndex (c^1, cI);
 				result [pEI] = result [pEI];
-				var hI = handI (c);
+				var hI = g.HandIndex (c);
 				result[hI] = result[hI];
 				// Update the bitboards
 				result [pEI] ^= (move);
-				var mask = Game.handMask[Game.demote[cI]];
+				var mask = g.handMask[g.demote[cI]];
 				B.PushMasked(ref result[hI], mask);
 			}
 			return result;
 		}
 
-		public override int pieceMoved ()
+		public override int PieceMoved ()
 		{
 			return mI;
 		}

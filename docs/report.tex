@@ -1,0 +1,48 @@
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsfont,amsmath,cite}
+\title{Solving small shogi}
+\author{I. van Duijn \\ Utrecht University}
+\begin{document}
+\maketitle
+
+\section{Abstract}
+%TODO
+
+\section{Introduction}
+Even since before
+%TODO
+%Research area of solving games.
+%The game of shogi and relevant topics.
+%Various methods for solving, PN is chosen.
+
+\section{Method}
+We are dealing with generic small sized shogi variants, so representation and algorithms employed have to be sufficiently generic as well.
+A small shogi variant is defined by the size of the board, the initial configuration of black (white's is $180\deg$ rotationally symmetrical) and
+the size of the promotion zone. The initial configuration consists of a set of pieces, each of which has one or two move sets (taking into account
+promotion). Any algorithm that aims to prove the game theoretical value of a variant then only has to have access to two functions based on this
+definition: a move generator which can map positions to a set of successing positions, and an evaluation function which recognises terminal
+positions and computes their value.
+
+\subsection{Representation}
+As state before, we have to be able to generically represent board positions. A well known technique in computer chess, bitboards, has been
+shown ~\cite{grimbergen2007using} to be fairly effective in shogi as well. A bitboard is a bit pattern of (at least) the size of the board,
+in which each bit encodes some information (e.g. if it is occupied) about the corresponding square. Since the size of the bit pattern can
+easily be increased to accomodate larger boards, they are well suited for our purpose. Also, as will be explained later, they allow for easy
+generic move generation.
+%TODO: Briefly explain implementation of boards.
+%TODO: Move generation and evaluation function.
+
+
+%subsection: Proof Number search
+
+%subsection: Breadth first search
+
+\section{Result}
+%subsection: PN failed
+
+%subsection: Combinatorial splosions.
+
+\section{Discussion}
+
+\end{document}

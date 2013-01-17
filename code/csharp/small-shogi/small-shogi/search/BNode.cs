@@ -26,12 +26,6 @@ namespace smallshogi.search
             this.c = c;
         }
 
-        public BNode(Ply p, BNode parent, byte colour)
-        {
-            this.position = p.apply(parent.position);
-            c = colour;
-        }
-
         public static void Reset()
         {
             transposition.Clear();
@@ -40,28 +34,24 @@ namespace smallshogi.search
 
         public static BNode Prove(BNode n, Game g)
         {
+			n.Evaluate (g);
 			transposition[n] = n;
             queue.Enqueue(n);
 			BNode next;
 			int count = 0;
-            while (n.value == 0)
+            while (n.value == 0 && queue.Count > 0)
             {
-                try{
-					next = queue.Dequeue();
-	                next.Expand(g);
-					InitiateVisiting();
-	                next.Update(g);
+				next = queue.Dequeue();
+                next.Expand(g);
+				InitiateVisiting();
+                next.Update(g);
 
-					if(count % 1000 == 0) {
-						Console.WriteLine("Value:         " + n.value);
-						Console.WriteLine("Transposition: " + BNode.transposition.Count);
-						Console.WriteLine("Queue:         " + BNode.queue.Count);
-					}
-					count++;
-				} catch (InvalidOperationException e)
-				{
-					break;
-				}
+				/*if(count % 1000 == 0) {
+					Console.WriteLine("Value:         " + n.value);
+					Console.WriteLine("Transposition: " + BNode.transposition.Count);
+					Console.WriteLine("Queue:         " + BNode.queue.Count);
+				}*/
+				count++;
             }
 
 			Console.WriteLine((n.value==1?"Black":n.value==-1?"White":"Nobody") + " won!");
@@ -88,10 +78,6 @@ namespace smallshogi.search
 				return;
 			}
 
-//			Console.WriteLine("To move: " + (c==1?"Black":"White"));
-//			Console.WriteLine(g.prettyPrint(position));
-//			Console.WriteLine("Value: " + newValue);
-
 			value = newValue;
 
 			foreach (var parent in parents)
@@ -106,7 +92,7 @@ namespace smallshogi.search
             var plies = g.children(position, c);
             foreach (var ply in plies)
             {
-                var s = new BNode(ply, this, (byte)(c ^ 1));
+                var s = new BNode(ply.Apply (position, g), (byte)(c ^ 1));
                 if (transposition.ContainsKey(s)) {
                     s = (BNode)transposition[s];
 				}
@@ -192,16 +178,16 @@ namespace smallshogi.search
         {
             InitiateVisiting();
             int size = Size(value);
-            Console.WriteLine(test);
+            Console.WriteLine(loops);
             return size;
         }
 
-        static int test = 0;
+        static int loops = 0;
         private int Size(int win)
         {
             if (IsVisited())
             {
-                test++;
+                loops++;
                 return 0;
             }
 
@@ -220,10 +206,12 @@ namespace smallshogi.search
 			Console.WriteLine ("{0} wins", value == 1 ? "Black" : value == -1 ? "White" : "Nobody");
 			Console.WriteLine ("{0} possible moves:", children.Count);
 			foreach (var child in children) {
+				Console.WriteLine ("Value: " + child.value);
 				Console.WriteLine (g.prettyPrint (child.position));
 			}
 			Console.WriteLine ("{0} parents:", parents.Count);
 			foreach (var parent in parents) {
+				Console.WriteLine ("Value: " + parent.value);
 				Console.WriteLine (g.prettyPrint (parent.position));
 			}
 			var input = Console.ReadLine ();
@@ -241,7 +229,7 @@ namespace smallshogi.search
 	            var plies = g.children(position, c);
 	            foreach (var ply in plies)
 	            {
-	                var s = new BNode(ply, this, (byte)(c ^ 1));
+	                var s = new BNode(ply.Apply (position, g), (byte)(c ^ 1));
 					Console.WriteLine(g.prettyPrint(s.position));
 	            }
 				Browse (g);

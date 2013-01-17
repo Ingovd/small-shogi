@@ -25,12 +25,6 @@ namespace smallshogi
             this.c = colour;
         }
 
-        public Node(Ply p, Node parent, byte colour)
-        {
-            this.position = p.apply(parent.position);
-            c = colour;
-        }
-
         public static void InitiateVisiting()
         {
             visitMarker++;
@@ -51,75 +45,28 @@ namespace smallshogi
             return this.marker == Node.visitMarker;
         }
 
-        public void Draw()
-        {
-            pn = Int32.MaxValue;
-            dn = 0;
-            Node.InitiateVisiting();
-            children = null;
-            foreach (var parent in parents)
-                parent.Update(null);
-        }
-
-        public bool DetectDraw()
-        {
-            InitiateVisiting();
-            return Drawn();
-        }
-
-        public bool Drawn()
-        {
-            // If this node has already been visited its a draw INCORRECT
-            if (IsVisited())
-                return true;
-            SetVisit();
-            // Check if this node is proven, return result
-            if (pn == 0 || dn == 0)
-                return pn > 0;
-            // Check if this is an unexpanded node, return no draw
-            if (children != null)
-            {
-                // Return draw value of children
-                if (c == 1)
-                {
-                    foreach (var child in children)
-                        if (!child.Drawn())
-                            return false;
-                    return true;
-                }
-                foreach (var child in children)
-                    if (child.Drawn())
-                        return true;
-            }
-            // Unvisit?
-            return false;
-        }
-
         public void StartUpdate()
         {
             UpdateNumbers();
 
             // Update parents
             foreach (var parent in parents)
-                parent.Update(this);
+                parent.Update();
         }
 
-        public void Update(Node origin)
+        public void Update()
         {
-            // DAG/DCG test, dont visit a node more than once
-            if (IsVisited())
+            if (IsVisited() || (pn == 0 || dn == 0))
                 return;
             SetVisit();
 
             UpdateNumbers();
 
-            // Clear some memory maybe
-            //if(pn == 0 || dn == 0)
-            //	children = null;
-
             // Update parents
             foreach (var parent in parents)
-                parent.Update(origin);
+                parent.Update();
+
+			UnVisit ();
         }
 
         public void UpdateNumbers()
@@ -174,18 +121,15 @@ namespace smallshogi
             }
         }
 
-        public bool Expand(Game g)
+        public void Expand(Game g)
         {
             if(children != null)
-            	return false;
+            	return;
             children = new List<Node>();
             var plies = g.children(position, c);
             foreach (var ply in plies)
             {
-                var s = new Node(ply, this, (byte)(c ^ 1));
-                /*s.Evaluate(g);
-                if(!transposition.ContainsKey(s))
-                    transposition[s] = s;*/
+                var s = new Node(ply.Apply(position, g), (byte)(c ^ 1));
                 if (transposition.ContainsKey(s))
                     s = (Node)transposition[s];
                 else
@@ -196,37 +140,38 @@ namespace smallshogi
                 s.parents.Add(this);
                 children.Add(s);
             }
-            return true;
         }
 
-        public Node GetCycle()
+		public List<Node> GetLongestGame(Game g)
         {
             InitiateVisiting();
-            return Cycle();
+            return DFSearch(g, pn, 0);
         }
 
-        public Node Cycle()
-        {
-            if (IsVisited())
-            {
-                foreach (var parent in parents)
-                    parent.children.Remove(this);
-                return this;
-            }
-            SetVisit();
-            if (children != null)
-                foreach (var child in children)
-                {
-                    var end = child.Cycle();
-                    if (end != null)
-                    {
-                        child.previous = this;
-                        return end;
-                    }
-                }
-            UnVisit();
-            return null;
-        }
+		public List<Node> DFSearch (Game g, int win, int depth)
+		{
+			if (IsVisited ())
+				return null;
+
+			SetVisit();
+			int sign = (win==0?1:-1) * (- 2 * c + 1);
+            sign = 1;
+			List<Node> temp = new List<Node> ();
+			List<Node> best = new List<Node> ();
+			int bestL = - sign * int.MaxValue;
+			if(children != null)
+				foreach (var child in children)
+					if (child.pn == win) {
+					temp = child.DFSearch(g, win, depth+1);
+					if(temp != null && sign * temp.Count > sign * bestL) {
+						best = temp;
+						bestL = best.Count;
+						}
+					}
+			best.Add(this);
+			UnVisit();
+			return best;
+		}
 
         public int Size()
         {
