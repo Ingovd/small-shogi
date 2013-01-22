@@ -10,10 +10,29 @@
 %TODO
 
 \section{Introduction}
-Even since before
-%TODO
-%Research area of solving games.
-%The game of shogi and relevant topics.
+Ever since the early days of modern computers there has been great interest in chess programming ~\cite{shannon1950xxii}. Initial
+focus in the west was mainly on chess and checkers, but when computers were well established in Japan as well, researchers there adopted
+many techniques many techniques from computer chess and applied them to their local chess variant, shogi.
+
+\subsection{shogi}%TODO relevant citations
+Shogi (Japanese chess) is a game similar to western chess. It is played on a $9 \times 9$ board and every
+player has 20 pieces, some of which correspond to western pieces and others are slightly different.
+From a chess programmer point of view, the main difference between shogi and chess is the so called drop rule.
+A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns.
+This gives shogi a game tree complexity of $10^{226}$, compared to $10^{123}$ of chess.\\
+
+Computer shogi is an active field of research. The main interest there is how we can program computers 
+such that their play peers with -- and eventually even surpasses -- human professional players. Shogi, being complexer
+than western chess, has a game tree too large to make exhaustive search even near feasible. Consequently, research
+focusses on clever ways to search the game tree in order to find a good heuristic.\\
+
+Unlike in western chess, end game situations
+in shogi are not significantly less complex than mid game situations. In fact, any board configuration resulting from the standard
+starting setup has exactly 40 pieces in play. Because of this there is no end game database for shogi with end games completely
+solved. However in shogi so called mating problems, which resemble end game situations, are extensively studied. There exist several
+programs that can completely solve a lot of these problems, some of which are quite large. Unfortunately solutions to these shogi mating problems
+are not the equivalent of solutions to western chess end games; in shogi, such a solution cannot be directly applied to find a winning move.
+
 %Various methods for solving, PN is chosen.
 
 \section{Method}
@@ -40,8 +59,8 @@ To generate moves, we essentially need two things. We need to know for each indi
 The location of each individual piece can easily be extracted from the bitboards representing a position. To determine where it can move to, a table
 is generated which maps position bitboards to move bitboards. %TODO illustrate with example
 
-Finally, the evaluation function \note{This function gives the game theoretical value of a position, not a heuristical value.}  can use the move
-generator to check whether any move captures the opponent's king.
+Finally, the evaluation function can use the move generator to check whether any move captures the opponent's king. Note that the evaluation function
+does not give a heuristical value, it only evaluates terminal positions to nonzero values ($1$ for win and $-1$ for loss).
 
 With the move generator and the evaluation function in place, we have an implicit definition of the game tree. The main problem of proving the game
 theoretical value efficiently is only generating relevant parts of the tree.
