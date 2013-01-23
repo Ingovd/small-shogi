@@ -17,19 +17,22 @@ many techniques many techniques from computer chess and applied them to their lo
 \subsection{shogi}%TODO relevant citations
 Shogi (Japanese chess) is a game similar to western chess. It is played on a $9 \times 9$ board and every
 player has 20 pieces, some of which correspond to western pieces and others are slightly different.
-From a chess programmer point of view, the main difference between shogi and chess is the so called drop rule.
-A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns.
-This gives shogi a game tree complexity of $10^{226}$, compared to $10^{123}$ of chess.\\
+The main difference between shogi and chess is the so called drop rule.
+A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns
+(in stead moving a piece already on the board).
+This extra rule dramatically increases the game tree complexity of shogi as compared to chess, see Table ? for a comparison.\\
+%TODO: tabel
 
 Computer shogi is an active field of research. The main interest there is how we can program computers 
 such that their play peers with -- and eventually even surpasses -- human professional players. Shogi, being complexer
 than western chess, has a game tree too large to make exhaustive search even near feasible. Consequently, research
-focusses on clever ways to search the game tree in order to find a good heuristic.\\
+focusses on clever ways to search the game tree in order to find a good heuristic. Many techniques from computer chess
+can be employed, but the drop rule introduces such a difference that new shogi-specific techniques have to be developed.\\
 
 Unlike in western chess, end game situations
 in shogi are not significantly less complex than mid game situations. In fact, any board configuration resulting from the standard
-starting setup has exactly 40 pieces in play. Because of this there is no end game database for shogi with end games completely
-solved. However in shogi so called mating problems, which resemble end game situations, are extensively studied. There exist several
+starting setup has exactly 40 pieces in play. Because of this there is no database with solved end games for shogi.
+However, in shogi, so called mating problems, which resemble end game situations, are extensively studied. There exist several
 programs that can completely solve a lot of these problems, some of which are quite large. Unfortunately solutions to these shogi mating problems
 are not the equivalent of solutions to western chess end games; in shogi, such a solution cannot be directly applied to find a winning move.
 
