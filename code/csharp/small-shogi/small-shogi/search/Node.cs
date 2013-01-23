@@ -17,8 +17,6 @@ namespace smallshogi
         public int pn, dn, marker;
         static int visitMarker;
 
-        public static Hashtable transposition = new Hashtable();
-
         public Node(Bits[] position, byte colour)
         {
             this.position = position;
@@ -56,7 +54,7 @@ namespace smallshogi
 
         public void Update()
         {
-            if (IsVisited() || (pn == 0 || dn == 0))
+            if (IsVisited() || (pn != 0 && dn != 0))
                 return;
             SetVisit();
 
@@ -68,6 +66,29 @@ namespace smallshogi
 
 			UnVisit ();
         }
+
+		public void StartUpdateTree ()
+		{
+			UpdateNumbers();
+
+			foreach(var parent in parents)
+				parent.UpdateTree (this);
+		}
+
+		public void UpdateTree (Node n)
+		{
+			if (this.Equals (n)) {
+				n.pn = Int32.MaxValue;
+				n.dn = 0;
+				n.Update ();
+				return;
+			}
+
+			UpdateNumbers();
+
+			foreach(var parent in parents)
+				parent.UpdateTree(n);
+		}
 
         public void UpdateNumbers()
         {
@@ -121,7 +142,7 @@ namespace smallshogi
             }
         }
 
-        public void Expand(Game g)
+        public void Expand(Game g, Hashtable transposition)
         {
             if(children != null)
             	return;
@@ -137,6 +158,22 @@ namespace smallshogi
                     s.Evaluate(g);
                     transposition[s] = s;
                 }
+                s.parents.Add(this);
+                children.Add(s);
+            }
+        }
+
+        public void ExpandTree(Game g, ref int nodeCount)
+        {
+            if(children != null)
+            	return;
+            children = new List<Node>();
+            var plies = g.children(position, c);
+            foreach (var ply in plies)
+            {
+                var s = new Node(ply.Apply(position, g), (byte)(c ^ 1));
+                s.Evaluate(g);
+				nodeCount++;
                 s.parents.Add(this);
                 children.Add(s);
             }

@@ -17,47 +17,11 @@ namespace smallshogi.search
         public int marker, value;
 
         static int visitMarker = 0;
-        public static Hashtable transposition = new Hashtable();
-        static Queue<BNode> queue = new Queue<BNode>();
 
         public BNode(Bits[] position, byte c)
         {
             this.position = position;
             this.c = c;
-        }
-
-        public static void Reset()
-        {
-            transposition.Clear();
-            queue.Clear();
-        }
-
-        public static BNode Prove(BNode n, Game g)
-        {
-			n.Evaluate (g);
-			transposition[n] = n;
-            queue.Enqueue(n);
-			BNode next;
-			int count = 0;
-            while (n.value == 0 && queue.Count > 0)
-            {
-				next = queue.Dequeue();
-                next.Expand(g);
-				InitiateVisiting();
-                next.Update(g);
-
-				/*if(count % 1000 == 0) {
-					Console.WriteLine("Value:         " + n.value);
-					Console.WriteLine("Transposition: " + BNode.transposition.Count);
-					Console.WriteLine("Queue:         " + BNode.queue.Count);
-				}*/
-				count++;
-            }
-
-			Console.WriteLine((n.value==1?"Black":n.value==-1?"White":"Nobody") + " won!");
-			Console.WriteLine("Transposition: " + BNode.transposition.Count);
-			Console.WriteLine("Queue:         " + BNode.queue.Count);
-            return n;
         }
 
         public void Update (Game g)
@@ -86,7 +50,7 @@ namespace smallshogi.search
 			UnVisit ();
         }
 
-        public void Expand(Game g)
+        public void Expand(Game g, Hashtable transposition, Queue<BNode> queue)
         {
             children = new List<BNode>();
             var plies = g.children(position, c);

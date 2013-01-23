@@ -127,7 +127,7 @@ namespace smallshogi
 			case		Type.PSilver:
 				return "S";
 			case		Type.PKnight:
-				return "K";
+				return "N";
 			case		Type.PLance:
 				return "L";
 			case		Type.Tokin:

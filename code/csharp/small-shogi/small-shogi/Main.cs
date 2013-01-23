@@ -36,49 +36,40 @@ namespace smallshogi
 			//setup.AddBlackPiece(5,0, Type.King);
 			//Game g = new Game (setup);
 
-			int start = 4;
+			int start = 8;
 
 			Game g = new Game(new GameSetup(start));
-			var root = new Node (g.startingPos, 1);
-			PNSearch pnSearch = new PNSearch ();
+			PNSearch search = new PNSearch();
 			Stopwatch sw = new Stopwatch ();
 			sw.Start ();
-			pnSearch.Search (root, g);
+			search.Prove(g);
 			sw.Stop ();
+			var root = search.root;
 			System.Console.WriteLine ("Done expanding in: " + sw.ElapsedMilliseconds + " milliseconds.");
-			System.Console.WriteLine ("Number of nodes:   " + Node.transposition.Count);
+			System.Console.WriteLine ("Number of nodes:   " + search.transposition.Count);
 			//System.Console.WriteLine("Tree depth:        " + root.Height());
-			System.Console.WriteLine ("Game value:        " + (root.pn==0?1:-1));
+			System.Console.WriteLine ("Game value:        " + (root.pn==0?1:root.pn==Int32.MaxValue?-1:0));
 			var bestGame = root.GetLongestGame(g);
 					foreach(var node in bestGame)
 						Console.WriteLine(g.prettyPrint(node.position));
 
-			/*var root = new BNode (g.startingPos, 1);
-			BNode.Prove (root, g);
-			//root.Browse(g);
-			var bestGame = root.DFSearch(g, root.value);
-			foreach(var node in bestGame)
-				Console.WriteLine(g.prettyPrint(node.position));
-			root.Browse (g);*/
 
-			GameSetup setup;
+
 			Game g2;
-			BNode root2;
+			BFSearch search2 = new BFSearch ();
 			int[] wins = new int[3];
 			for (int i = start; i < 1372; i++) {
-				setup = new GameSetup (i);
-				g2 = new Game(setup);
-				root2 = new BNode (g2.startingPos, 1);
+				g2 = new Game(new GameSetup (i));
+				search2.Prove(g2);
+				var root2 = search2.root;
 				if(g2.gamePosition(root2.position, 1) < 0) {
-					BNode.Prove (root2, g2);
                     //Console.WriteLine(root2.WinningStrategySize());
 					//root2.Browse	(g2);
-                    var bestGame2 = root2.GetLongestGame(g2);
+                   /* var bestGame2 = root2.GetLongestGame(g2);
 					foreach(var node in bestGame2)
-						Console.WriteLine(g2.prettyPrint(node.position));
+						Console.WriteLine(g2.prettyPrint(node.position));*/
 					wins[root2.value+1]++;
 					Console.WriteLine("Black: {0}\nWhite: {1}\nNone:  {2}",wins[2], wins[0], wins[1]);
-					BNode.Reset();
 				}
 			}
 		}

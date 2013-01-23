@@ -9,24 +9,30 @@ namespace smallshogi
 		static Func<Node, int> PN = n => n.pn;
 		static Func<Node, int> DN = n => n.dn;
 
+		public Hashtable transposition = new Hashtable();
+		public int nodeCount = 0;
+
+		public Node root;
+
 		public PNSearch ()
 		{
 		}
 
-		public int Search (Node root, Game g)
+		public int Prove (Game g)
 		{
+			root = new Node(g.startingPos, 1);
 			root.Evaluate(g);
 			int count = 0;
 			while (root.pn != 0 && root.dn != 0) {
 				var mpn = MostProving(root);
                 Node.InitiateVisiting();
-                mpn.Expand(g);
+                mpn.Expand(g, transposition);
 				Node.InitiateVisiting();
 				mpn.Update ();
 				if(count % 100 == 0) {
 					Node.InitiateVisiting ();
 					Console.WriteLine(root.pn + " and " + root.dn);
-					Console.WriteLine("Transposition: " + Node.transposition.Count);
+					Console.WriteLine("Transposition: " + transposition.Count);
 				}
 				if(count >= 1000000)
 					break;
@@ -39,11 +45,17 @@ namespace smallshogi
 		public Node MostProving (Node v)
 		{
 			Node.InitiateVisiting ();
-			while (v.children != null && !v.IsVisited ())
+			while (v.children != null) {
 				if (v.c == 1)
 					v = LeftmostNode (v, PN);
 				else
 					v = LeftmostNode (v, DN);
+				if(v.IsVisited ()) {
+					v.pn *= 2;
+					v.dn *= 2;
+					break;
+				}
+			}
 			return v;
 		}
 
