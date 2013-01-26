@@ -1,0 +1,57 @@
+\documentclass{paper}
+\usepackage{graphicx}
+\usepackage{amsfonts}\usepackage{amsmath}
+\title{Winning strategies for small shogi boards}
+\author{I. van Duijn}
+\begin{document}
+\maketitle
+\section{Introduction}
+Shogi (Japanese chess) is a game similar to western chess. It is played on a $9 \times 9$ board and every
+player has 20 pieces, some of which correspond to western pieces and others are slightly different.
+From a chess programmer point of view, the main difference between shogi and chess is the so called drop rule.
+A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns.
+This gives shogi a game tree complexity of $10^{226}$, compared to $10^{123}$ of chess.
+
+\section{Computer shogi}
+Computer shogi is an active field of research. The main interest there is how we can program computers 
+such that their play peers with -- and eventually even surpasses -- human professional players. Shogi, being complexer
+than western chess, has a game tree too large to make exhaustive search even near feasible. Consequently, research
+focusses on clever ways to search the game tree in order to find a good heuristic.
+
+Unlike in western chess, end game situations
+in shogi are not significantly less complex than mid game situations. In fact, any board configuration resulting from the standard
+starting setup has exactly 40 pieces in play. Because of this there is no end game database for shogi with end games completely
+solved. However in shogi so called mating problems, which resemble end game situations, are extensively studied. There exist several
+programs that can completely solve a lot of these problems, some of which are quite large. Unfortunately solutions to these shogi mating problems
+are not the equivalent of solutions to western chess end games; in shogi, such a solution cannot be directly applied to find a winning move.
+
+\section{Mating problems}
+In a mating problem, the attacker is only allowed to make checking moves, while the defender prolongs mate as long as possible.
+Usually not all the pieces are in play, specifically the attacker's king is always absent. A mating problem should have a unique solution and
+is considered invalid if it has multiple solutions.
+
+The absence of one king already shows that a mating problem differs greatly from a real end game situation. Also, not all pieces are in play and
+it is possible that a winning move in normal end game play is not a checking move. However the fact that a solution to a mating problem resembles a winning
+strategy is interesting.
+
+\section{Solving small shogi boards}
+It is not known whether there is a winning strategy for shogi since drawing is possible. If a winning strategy exists though,
+it is very interesting to know what moves are good (winning) and which are bad. It was already evident that solving normal shogi
+is infeasible, but solving small boards with fewer pieces might prove interesting. It is probably feasible to completely solve some of these
+small boards and thus answer questions like is there a winning strategy, if so for which player and which of his moves are good.
+
+Subsequently, what might be interesting is how altering the rules of a small board -- like changing the pieces, drawing rule or increasing the size of the board --
+influences winning moves. Of course, solving small boards should first prove to be feasible.
+
+\section{What to do}
+From a small project point of view, studying how we can solve small shogi boards probably comprises the following:
+\begin{itemize}
+	\item Small literature study, analyse which methods might be useful for solving small shogi
+	\item Figure out methods to solve mating problems
+	\item Implement a combination of methods and try to solve small shogi board
+	\item Analyse results
+\end{itemize}
+A possible obstacle is that a lot of literature on this subject is in Japanese and not readily available. Fortunately there is
+also a decent amount of readily available research papers written in English, which in a lot of cases heavily cite Japanese research.
+This at least means that available research is based on Japanese papers.
+\end{document}
