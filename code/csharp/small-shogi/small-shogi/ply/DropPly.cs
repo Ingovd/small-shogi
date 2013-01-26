@@ -2,44 +2,39 @@ using System;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
-    using B = BitBoard;
-
 	public class DropPly : Ply
 	{
-		// Index of dropped piece unadjusted for colour
-		int dropIndex;
+		// Index of dropped piece
+		int dI;
 		// Bitboard specifying where the piece is dropped
-		Bits location;
-		public DropPly (int c, int dropIndex, Bits location)
+		BitBoard location;
+		public DropPly (int c, int dI, BitBoard location)
 		{
 			this.c = c;
-			this.dropIndex = dropIndex;
+			this.dI = dI;
 			this.location = location;
 		}
 
-
-		public override Bits[] Apply (Bits[] position, Game g)
+		public override BitBoard[] apply (BitBoard[] position)
 		{
-			//Create a new set of bits
-			var result = new Bits[position.Length];
+			var result = new BitBoard[position.Length];
 			Array.Copy (position, result, position.Length);
-
-			// Drop the piece in question by setting the location bit
-			result [g.PieceIndex  (c, dropIndex)] |= location;
-
+			// Drop the piece in question
+			var pI = pieceI  (c, dI);
+			result [pI] = new BitBoard(result [pI]);
+			result [pI].Xor (location);
 			// Remove the piece from the player's hand
-			Bits mask = g.handMask[dropIndex];
-			var handIndex = g.HandIndex (c);
-			result[handIndex] = result[handIndex];
-			B.PopMasked(ref result[handIndex], mask);
+			var mask = new BitBoard(Game.handMask[dI]);
+			var hI = handI (c);
+			result[hI] = new BitBoard(result[hI]);
+			result[hI].PopMasked(mask);
 
 			return result;
 		}
 
-		public override int PieceMoved ()
+		public override int pieceMoved ()
 		{
-			return dropIndex;
+			return dI;
 		}
 	}
 }

@@ -2,32 +2,29 @@ using System;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
-    using B = BitBoard;
-
 	public class MovePly : Ply
 	{
 		// Index piece moved and piece captured
-		int movedIndex, capturedIndex;
+		int mI, cI;
 		// Bool indicating whether this move leads to a promotion
 		bool promo = false;
 		// A bitboard for initial square and moved square
-		Bits square, move;
-		public MovePly (int c, int mI, Bits square, Bits move)
+		BitBoard square, move;
+		public MovePly (int c, int mI, BitBoard square, BitBoard move)
 		{
 			this.c = c;
-			this.movedIndex = mI;
+			this.mI = mI;
 			this.square = square;
 			this.move = move;
 
 			// Default value
-			capturedIndex = -1;
+			cI = -1;
 		}
 
 		public MovePly branchPromotion ()
 		{
-			var promoPly = new MovePly(c, movedIndex, square, move);
-            promoPly.setCaptureIndex(capturedIndex);
+			var promoPly = new MovePly(c, mI, square, move);
+            promoPly.setCaptureIndex(cI);
 			promoPly.setPromotion();
 			return promoPly;
 		}
@@ -38,39 +35,43 @@ namespace smallshogi
 
 		public void setCaptureIndex (int cI)
 		{
-			this.capturedIndex = cI;
+			this.cI = cI;
 		}
 
-		public override Bits[] Apply (Bits[] position, Game g)
+		public override BitBoard[] apply (BitBoard[] position)
 		{
-			var result = new Bits[position.Length];
+			var result = new BitBoard[position.Length];
 			Array.Copy (position, result, position.Length);
 			// Remove the piece from initial position
-			var pI = g.PieceIndex (c, movedIndex);
-            result[pI] ^= square;
+			var pI = pieceI (c, mI);
+			result [pI] = new BitBoard (result [pI]);
+			result [pI].Xor (square);
 			// Put it on new position, possibly promoting
 			if (promo) {
-				var pPI = g.PromotedIndex (c, movedIndex);
-				result [pPI] ^= move;
+				var pPI = piecePI (c, mI);
+				result [pPI] = new BitBoard(result [pPI]);
+				result [pPI].Xor (move);
 			}
 			else
-				result [g.PieceIndex (c, movedIndex)] ^= move;
+				result [pieceI (c, mI)].Xor (move);
 			// If a piece is captured update hand and enemy piece
-			if (capturedIndex >= 0) {
-				// Get the correct indices
-				var pEI = g.PieceIndex (c^1, capturedIndex);
-				var hI = g.HandIndex (c);
+			if (cI >= 0) {
+				// Create copies of pieceEI and handI
+				var pEI = pieceEI (c, cI);
+				result [pEI] = new BitBoard(result [pEI]);
+				var hI = handI (c);
+				result[hI] = new BitBoard(result[hI]);
 				// Update the bitboards
-				result [pEI] ^= (move);
-				var mask = g.handMask[g.demote[capturedIndex]];
-				B.PushMasked(ref result[hI], mask);
+				result [pEI].Xor (move);
+				var mask = new BitBoard(Game.handMask[Game.demote[cI]]);
+				result[hI].PushMasked(mask);
 			}
 			return result;
 		}
 
-		public override int PieceMoved ()
+		public override int pieceMoved ()
 		{
-			return movedIndex;
+			return mI;
 		}
 	}
 }

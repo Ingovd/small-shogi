@@ -3,164 +3,154 @@ using System.Collections.Generic;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
-
-	public static class BitBoard
+	public class BitBoard
 	{
-		/// <summary>
-		/// Returns the least significant bit of <para>bits</para>.
-		/// </summary>
-		/// <returns>
-		/// A bit pattern of equal length as <para>bits</para> with only the least significant bit of <para>bits</para> set.
-		/// </returns>
-		/// <param name='bits'>
-		/// Bit pattern from which the least significant bit is extracted.
-		/// </param>
-		public static Bits LSBit (Bits bits)
+		public UInt32 bits;
+
+		public BitBoard ()
 		{
-			return bits & ~(bits - 1);
+			bits = 0;
 		}
 
-		/// <summary>
-		/// Interprets the masked bits as a stack and pushes a bit on top of it.
-		/// </summary>
-		/// <param name='bits'>
-		/// Bit pattern containing several stacks accessible by masking the correct consecutive bits.
-		/// </param>
-		/// <param name='mask'>
-		/// Mask indicating what stack in <para>bits</para> to use.
-		/// </param>
-		public static void PushMasked (ref Bits bits, Bits mask)
+		public BitBoard (uint bits)
 		{
-			// Get masked value
-			var masked = bits & mask;
-			// Add pushed masked value (disregarding overflow, easily fixed by masking again)
-			bits |= (masked << 1) | LSBit (mask);
+			this.bits = bits;
 		}
 
-		/// <summary>
-		/// Interprets the masked bits as a stack and pops one bit off of it.
-		/// </summary>
-		/// <param name='bits'>
-		/// Bit pattern containing several stacks accessible by masking the correct consecutive bits.
-		/// </param>
-		/// <param name='mask'>
-		/// Mask indicating what stack in <para>bits</para> to use.
-		/// </param>
-		public static void PopMasked (ref Bits bits, Bits mask)
+		public BitBoard (BitBoard b)
+		{
+			this.bits = b.bits;
+		}
+
+		public BitBoard And (BitBoard b)
+		{
+			bits &= b.bits;
+			return this;
+		}
+
+		public BitBoard Or (BitBoard b)
+		{
+			bits |= b.bits;
+			return this;
+		}
+
+		public BitBoard Xor (BitBoard b)
+		{
+			bits ^= b.bits;
+			return this;
+		}
+
+		public BitBoard Not ()
+		{
+			bits = ~bits;
+			return this;
+		}
+
+		public uint LSB ()
+		{
+			return bits & ~(bits - 1U); // TODO (if needed): should return index
+		}
+
+		public BitBoard LSBitBoard ()
+		{
+			return new BitBoard (bits & ~(bits - 1));
+		}
+
+		public BitBoard PushMasked (BitBoard mask)
 		{
 			// Get masked value
-			var masked = bits & mask;
+			var masked = new BitBoard(bits & mask.bits);
 			// Remove it
-			bits ^= masked;
-			// Add popped masked value
-			bits |= (masked >> 1) & mask;
+			bits ^= masked.bits;
+			// Add pushed masked value (disregarding overflow, easily added by masking again)
+			bits |= (masked.bits << 1) | mask.LSBitBoard().bits;
+			return this;
 		}
 
-		/// <summary>
-		/// This method is used to access all the on bits in <para>bits</para> as bit pattern with equal length
-		/// as <para>bits</para>.
-		/// </summary>
-		/// <returns>
-		/// A minimal list of bit patterns with exactly one on bit such that their symmetric difference equals <para>bits</para>.
-		/// </returns>
-		/// <param name='bits'>
-		/// The bit pattern from which each individual on bit is extracted.
-		/// </param>
-		public static List<Bits> allOnes (Bits bits)
+		public BitBoard PopMasked (BitBoard mask)
 		{
-			var result = new List<Bits> ();
-			Bits workingBits = bits;
-			Bits i;
+			// Get masked value
+			var masked = new BitBoard(bits & mask.bits);
+			// Remove it
+			bits ^= masked.bits;
+			// Add popped masked value
+			bits |= mask.LSBitBoard ().Not ().And(masked).bits >> 1;
+			return this;
+		}
+
+		public List<BitBoard> allOnes ()
+		{
+			var result = new List<BitBoard> ();
+			BitBoard workingBits = new BitBoard (bits);
+			BitBoard i;
 			while (true) {
-				i = LSBit (workingBits);
-				if (i != 0) {
+				i = workingBits.LSBitBoard ();
+				if (i.bits != 0) {
 					result.Add (i);
-					workingBits ^= i;
+					workingBits.Xor (i);
 				} else
 					break;
 			}
 			return result;
 		}
 
-		/// <summary>
-		/// Get the value of bit <para>i</para> in bits.
-		/// </summary>
-		/// <param name='bits'>
-		/// Input bit pattern.
-		/// </param>
-		/// <param name='i'>
-		/// Index of the accessed bit.
-		/// </param>
-		public static bool Get (Bits bits, int i)
+		public bool Get (int i)
 		{
 			return (bits & (1 << i)) != 0;
 		}
 
-		/// <summary>
-		/// Set the value of bit <para>i</para> in bits.
-		/// </summary>
-		/// <param name='bits'>
-		/// Input bit pattern.
-		/// </param>
-		/// <param name='i'>
-		/// Index of the accessed bit.
-		/// </param>
-		public static Bits Set (ref Bits bits, int i)
+		public void Set (int i)
 		{
-			return bits |= ((Bits)(1 << i));
+			bits |= (uint)(1 << i);
 		}
 
-		/// <summary>
-		/// This method is used to check whether two bit patterns overlap (i.e. non-empty intersection).
-		/// </summary>
-		/// <param name='b1'>
-		/// First bit pattern.
-		/// </param>
-		/// <param name='b2'>
-		/// Second bit pattern.
-		/// </param>
-		public static bool Overlaps (Bits b1, Bits b2)
+        public bool IsEmpty()
+        {
+            return bits == 0;
+        }
+
+		public bool NotEmpty ()
 		{
-			return (b1 & b2) != 0;
+			return bits != 0;
 		}
 
-		/// <summary>
-		/// This method is used to check whether one bit pattern is a subset of another (i.e. union equals superset).
-		/// </summary>
-		/// <param name='b1'>
-		/// The possible subset bit pattern.
-		/// </param>
-		/// <param name='b2'>
-		/// The possible superset bit pattern.
-		/// </param>
-		public static bool Subset (Bits sub, Bits super)
-		{
-			return (sub & super) == sub;
+		public bool Overlaps(BitBoard b) {
+			return (bits & b.bits) != 0;
 		}
 
-		/// <summary>
-		/// Used for outputting a bit pattern as a <para>width</para>x<para>height</para> block.
-		/// </summary>
-		/// <returns>
-		/// A string of 1's and 0's representing the bit pattern <para>bits</para>.
-		/// </returns>
-		/// <param name='bits'>
-		/// Bits to be formatted as a string.
-		/// </param>
-		/// <param name='width'>
-		/// Width of the block.
-		/// </param>
-		/// <param name='height'>
-		/// Height of the block.
-		/// </param>
-		public static string ToString (Bits bits, int width, int height)
+		public bool Subset(BitBoard b) {
+			return (bits & b.bits) == bits;
+		}
+
+		public override int GetHashCode ()
+		{
+			return (int)bits;
+		}
+
+		public override bool Equals (Object obj)
+		{
+			if (obj == null)
+				return false;
+			BitBoard b = obj as BitBoard;
+			if (b == null)
+				return false;
+			return bits == b.bits;
+		}
+
+		public bool Equals (BitBoard b)
+		{
+			if (b == null)
+				return false;
+			return bits == b.bits;
+		}
+
+		public string ToString (int width, int length)
 		{
 			string s = "";
-			for (int i = 0; i < height; i++) {
+			for (int i = 0; i < length; i++) {
 				if (i % width == 0 && i != 0)
 					s += "\n";
-				bool bit = Get (bits, i);
+				bool bit = Get (i);
 				s += bit ? 1 : 0;
 			}
 			return s;

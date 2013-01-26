@@ -1,21 +1,15 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="small-shogi/Main.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="small-shogi/search/PNSearch.cs">
     <Files>
-      <File FileName="small-shogi/Main.cs" Line="41" Column="4" />
-      <File FileName="small-shogi/search/BFSearch.cs" Line="19" Column="28" />
-      <File FileName="small-shogi/search/BNode.cs" Line="19" Column="36" />
-      <File FileName="small-shogi/search/PNSearch.cs" Line="55" Column="15" />
-      <File FileName="small-shogi/search/Node.cs" Line="94" Column="10" />
-      <File FileName="small-shogi/Game.cs" Line="368" Column="3" />
-      <File FileName="small-shogi/GameSetup.cs" Line="100" Column="21" />
-      <File FileName="small-shogi/pieces/Piece.cs" Line="167" Column="24" />
-      <File FileName="small-shogi/ply/MovePly.cs" Line="70" Column="1" />
+      <File FileName="small-shogi/Main.cs" Line="95" Column="1" />
+      <File FileName="small-shogi/search/PNSearch.cs" Line="255" Column="20" />
+      <File FileName="small-shogi/Game.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
     <BreakpointStore>
-      <Breakpoint file="/home/ingo/UU/project/small-shogi/code/csharp/small-shogi/small-shogi/Main.cs" line="58" />
+      <Breakpoint file="/home/ingo/UU/project/small-shogi/code/csharp/small-shogi/small-shogi/Main.cs" line="95" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MonoDevelop.Ide.DebuggingService.PinnedWatches />
