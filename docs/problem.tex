@@ -1,14 +1,30 @@
 \documentclass{article}
 \begin{document}
 
-Positions (board and hand) can and will occur more than once in the game tree. However as nodes in the tree, these positions are not truely identical. In fact, a node is uniquely defined by its position and path to the root.\\
-When calculating game theoretical values of the nodes, the notion of identical positions in nodes can be useful to reduce computation time. We distinguish two types of identical positions, transpositions and repititions. Transpositions are important for reducing computation time, and reptitions for termination (as they lead to draw).\\
-Representing the game tree as a finite state machine with positions as states and plies as transitions results in a troublesome structure, namely a directed cyclic graph. During proof number search this structure is being traversed constantly, so cycles immediately pose a threat to the termination of the algorithm.\\
+Positions (board and hand) can and will occur more than once in the game tree. However as nodes in the tree, these positions are not truely identical.
+In fact, a node is uniquely defined by its position and path to the root.\\
+When calculating game theoretical values of the nodes, the notion of identical positions in nodes can be useful to reduce computation time.
+We distinguish two types of identical positions, transpositions and repititions. Transpositions are important for reducing computation time,
+and reptitions for termination (as they lead to draw).\\
+Representing the game tree as a finite state machine with positions as states and plies as transitions results in a troublesome structure,
+namely a directed cyclic graph. During proof number search this structure is being traversed constantly, so cycles immediately pose a threat to the termination of the algorithm.\\
 The simple solution of representing the game tree as an actual tree has the obvious drawback of being very memory and computation time consuming.\\
 
-The goal of proof number search is to proof nodes, i.e. determine whether a position is winning, losing or drawing. This method relies heavily on recognizing terminal positions. Winning and losing nodes are easily determined (capturing the king), but the difficulty of detecting drawing nodes is very dependant on the representation. Storing the game tree as an actual tree allows for easy draw detection whereas a finite state automaton does not automatically offer such information. It seems that compressing the game tree to a DCG -- albeit a lossless compression -- makes vital information for draw detection not easily accessible.\\
+The goal of proof number search is to prove nodes, i.e. determine whether a position is winning, losing or drawing. This method relies
+heavily on recognizing terminal positions. Winning and losing nodes are easily determined (capturing the king), but the difficulty of
+detecting drawing nodes is very dependant on the representation. Storing the game tree as an actual tree allows for easy draw detection
+whereas a finite state automaton does not automatically offer such information. It seems that compressing the game tree to a DCG -- albeit
+a lossless compression -- makes vital information for draw detection not easily accessible.\\
 
-We define a draw as an enforced repitition. As such it does not matter exactly how many repititions are necessary according to the rules, if one repitition can be forced, any number is possible. If we want to detect repititons, a history of a position is needed. In trees this comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. If the tree is compressed into a DCG however, it is not immediately clear what a repitition is. Obviously cycles are related to repititions, but not necessarily forced reptitions. A winning strategy will probably overlap with multiple cycles, but never contain a full cycle.\\
+We define a draw as an enforced repitition. As such it does not matter exactly how many repititions are necessary according to the rules,
+if one repitition can be forced, any number is possible. If we want to detect repititons, a history of a position is needed. In trees this
+comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. If the tree is compressed into a
+DCG however, it is not immediately clear what a repitition is. Obviously cycles are related to repititions, but not necessarily forced
+reptitions. A winning strategy will probably overlap with multiple cycles, but never contain a full cycle.\\
 
-In the context of proof number search, a draw node is not a terminal node (it has children) and it can not be proven directly by its children. Indeed, if draw nodes are never proved in PN-search, every draw node has at least one child which is also a draw node. The theoretically easiest way to prove the root to be a draw is by expanding the complete automaton. This method however is computationally very expensive as it explores all possible games by two players who have no intention to win the game. It is therefor vital that draw nodes be detected sooner rather than later in the search. So a very important question is, what constitutes an internal draw node? 
+In the context of proof number search, a draw node is not a terminal node (it has children) and it can not be proven directly by its
+children. Indeed, if draw nodes are never proved in PN-search, every draw node has at least one child which is also a draw node.
+The theoretically easiest way to prove the root to be a draw is by expanding the complete automaton. This method however is computationally
+very expensive as it explores all possible games by two players who have no intention to win the game. It is therefor vital that draw nodes
+be detected sooner rather than later in the search. So a very important question is, what constitutes an internal draw node? 
 \end{document}
