@@ -52,7 +52,7 @@ namespace smallshogi
 
         public void Update()
         {
-            if (IsVisited() || (pn != 0 && dn != 0))
+            if (IsVisited() || !(pn != 0 && dn != 0))
                 return;
             SetVisit();
 

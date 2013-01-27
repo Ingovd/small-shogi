@@ -17,7 +17,7 @@
 %TODO
 
 \section{Introduction}
-Ever since the early days of modern computers there has been great interest in chess programming~\cite{shannon1950xxii}. Initial
+Ever since the early days of modern computers there has been great interest in chess programming. Initial
 focus in the west was mainly on chess and checkers, but when computers were well established in Japan, researchers there adopted
 many techniques from computer chess and applied them to their local chess variant, shogi.
 
@@ -62,7 +62,7 @@ certain subsets or small variants of shogi.\\
 
 \subsection{Solving small shogi variants}
 Even though end game situations in shogi are quite complex, there are of course enough situations advanced enough -- near victory -- that they
-be perfectly solvable. For instance if no move of the losing player can check the opposing king, it might be possible to restrict the search
+should be perfectly solvable. For instance if no move of the losing player can check the opposing king, it might be possible to restrict the search
 for the optimal move to a subset of the board. We are going to emulate this by actually looking at shogi variants played on a smaller board
 altogether.
 
@@ -92,11 +92,27 @@ generic move generation.
 In the current implementation, a position is represented by one bitboard per player per piece's move set (unpromoted and promoted), plus an additional
 bitboard per player containing the pieces in hand. Each bitboard corresponding to a certain piece's move set represents all pieces of that type
 owned by a specific player. For an $n \times m$ board, each bitboard is fitted in the smallest $nm \leq 2^k$-bit integer (for small
-variants $16$ or $32$ bit integers suffice). %TODO: example
+variants $16$ or $32$ bit integers suffice). In figure \ref{bitboard} you can see an example configuration on a $3 \times 3$ board with the
+bitboard representing white's rooks.
+
+\begin{figure}[h]
+\center
+%TODO: pictures
+\caption{An example configuration with corresponding bitboard for some piece type.}
+\label{bitboard}
+\end{figure}
 
 To generate moves, we essentially need two things. We need to know for each individual piece where it is, and where it can move to in its current state.
 The location of each individual piece can easily be extracted from the bitboards representing a position. To determine where it can move to, a table
-is generated which maps position bitboards to move bitboards. %TODO illustrate with example
+is generated which maps position bitboards to move bitboards. In figure \ref{moveboard} is an example of all the possible moves of one of black's silver
+generals standing in the lower left corner.
+
+\begin{figure}[h]
+\center
+%TODO: pictures
+\caption{An example bitboard with corresponding moveboard for some piece type.}
+\ref{moveboard}
+\end{figure}
 
 Finally, the evaluation function can use the move generator to check whether any move captures the opponent's king. Note that the evaluation function
 does not give a heuristical value, it only evaluates terminal positions to nonzero values ($1$ for win and $-1$ for loss).
@@ -185,32 +201,31 @@ An unproved node can be an internal or leaf node of the search tree.
 
 To define the most proving node we need a notion of how close a node is of being proved.
 \begin{mydef}
-Given a search tree $(N, E)$, a set $P \subset N$ is called a proof set of a node $v \in N$ if proving all $w \in P$ will prove $v$.
-A disproof set is defined similarly. A (dis)proof set is called minimal if all its subsets are not (dis)proof sets.
+Given a search tree $(N, E)$, a set $P \subset N$ is called a proof set of a node $v \in N$ if proving all $w \in P$ will prove $v$.\\
+Similarly, a set $D$ is called a disproof set of a node $v$ if proving all $w \in D$ will disproof $v$.\\
+A (dis)proof set is called minimal if all its subsets are not (dis)proof sets.
 \end{mydef}
-In the search tree in figure \ref{tree:pnex}, the root has proof sets $\{e, f\}$ and $\{h\}$ of which the latter is minimal,
+In the search tree in figure \ref{tree:pnex}, the root has minimal proof sets $\{e, f\}$ and $\{h\}$,
 and minimal disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
 
 For OR nodes, only one of its children has to be proved in order to prove it. Consequently, there exists a set of nodes which is a minimal
 proof set for both the parent OR node as well as one of its children. A similar property holds for AND nodes and disproof sets.
 \begin{mydef}
 Given an unproved OR node $v$ and a subtree $T$ rooted at $w$, then $T$ is called the most promising branch if there exists a set of nodes $P$
-which is a minimal proof set of $v$ and $w$. Simalarly if $v$ is an AND node, $T$ is most promising if $P$ is a minimal disproof set.
+which is a smallest minimal proof set of $v$ and $w$. Simalarly if $v$ is an AND node, $T$ is most promising if $P$ is a smallest minimal disproof set.
 \end{mydef}
 The most proving node is the first unexpanded node the algorithm encounters when successively selecting the most promising branch starting from
 the root.
 
 \subsubsection*{(Dis)proof numbers}
-
-\subsubsection*{Breadth-first search}
-For comparison there is also a simple breadth-first search implementation.
+Introduce proof numbers and some pseudo code for the algorithm.
 
 \subsection{Tree vs. Graph}
-So far we have discussed trees and proving nodes to have either value $1$ or $-1$. However there is a third outcome to shogi, draw. Though
+So far we have discussed trees and how to prove nodes to have either value $1$ or $-1$. However there is a third outcome to shogi, draw. Though
 very rare in full sized shogi, it can occur on small variants. Draw in shogi occurs if there has been a repitition
 of moves four times. Because of the drop rule \textit{any} position on the board can be repeated (repititions), moreover, different move
 sequences can lead to the same position (transposition). So strictly adhering to the drawing rule would result in immensely large game trees,
-even for the smallest variants.\\
+even for the smallest variants.
 A draw is a forced repitition of moves and as such it does not matter exactly how many repititions are necessary according to the rules,
 if one repitition of moves can be forced, any number is possible. If we want to detect these repititons, a history of a position is needed. In trees this
 comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. Therefor if we use an actual tree internally
@@ -219,15 +234,35 @@ To evaluate drawing games we simply run our algorithm twice, the first time repe
 The game is a draw if both runs show that the player who loses on draws also loses the game. Or alternatively, if a player has a winning strategy
 even when he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
 
-However, even with this modification transpositions %TODO splain why this still does not help
+However, even with this modification transpositions still introduce a lot of nodes in the game tree with the same position. A possible solution
+is to represent the search tree internally as a graph. While completely solving the issue of duplicate positions, efficient draw detection becomes
+really hard. Additionally, since proof-number search was designed for trees, this also means the algorithm would have to be adapted.
+Though it has been shown that proof-number search can still perform quite good on directed acyclic graphs, on cyclic graphs the algorithm
+can give incorrect results ~\cite{TODO}.\\
 
+Maybe explain what adaptations were necessary for the algorithm to work on graphs?
+
+\subsubsection*{Breadth-first search}
+To compare the results of proof-number search on graphs and trees
 
 \section{Result}
+Compare results of the three algorithms (BFS, PN on graph, PN on tree) and explain the differences.\\
 %subsection: Point out where and why PN fails where BFS succeeds.
 
+Explain behaviour of PN on both trees and graphs?\\
 %subsection: Elaborate on why PN fails on trees (splosion) and on graphs (algorithm breaks)
+
+Show what happens with PN on a tree for children shogi, and relate this to japanese result on solving it.
 %children shogi pns tree: how many nodes/collisions/etc.
 
-\section{Discussion}
+\section{Discussion/conclusion}
+\begin{itemize}
+	\item Even very small instances of shogi are quite complex.
+	\item PN search not really fitted for non-destructive games
+	\item Are there other viable methods for proving small games? How do they differ from PN search?
+\end{itemize}
+
+\bibliography{cites}{}
+\bibliographystyle{plain}
 
 \end{document}

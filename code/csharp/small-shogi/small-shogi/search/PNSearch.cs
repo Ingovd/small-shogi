@@ -80,26 +80,31 @@ namespace smallshogi
 		{
 			Node.InitiateVisiting ();
 			while (v.children != null) {
-				if (v.c == 1)
-					v = LeftmostNode (v, PN);
-				else
-					v = LeftmostNode (v, DN);
+				v = LeftmostNode (v);
 				if(v.IsVisited ()) {
-					v.pn *= 2;
-					v.dn *= 2;
+					//v.pn *= 2;
+					//v.dn *= 2;
 					break;
 				}
 			}
 			return v;
 		}
 
-		public Node LeftmostNode (Node v, Func<Node, int> f)
+		public Node LeftmostNode (Node v)
 		{
 			v.SetVisit ();
 			foreach (var child in v.children)
-				if (f(child) == f(v) && !child.IsVisited ())
-					return child;
-			return v;
+                if (v.c == 1)
+                {
+                    if (child.pn == v.pn && !child.IsVisited())
+                        return child;
+                }
+                else
+                {
+                    if (child.dn == v.dn && !child.IsVisited())
+                        return child;
+                }
+                    return v;
 		}
 
         public void SetTimeLimit(int minutes)
