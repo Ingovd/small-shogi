@@ -15,7 +15,8 @@ namespace smallshogi
         public Node previous;
         public byte c;
         public int pn, dn, marker;
-        static int visitMarker;
+
+        public static int visitMarker;
 
         public Node(Bits[] position, byte colour)
         {
@@ -45,11 +46,8 @@ namespace smallshogi
 
         public void StartUpdate()
         {
-            UpdateNumbers();
-
-            // Update parents
-            foreach (var parent in parents)
-                parent.Update();
+            InitiateVisiting();
+            Update();
         }
 
         public void Update()
@@ -179,13 +177,13 @@ namespace smallshogi
             }
         }
 
-		public List<Node> GetLongestGame(Game g)
+		public List<Node> GetLongestGame()
         {
             InitiateVisiting();
-            return DFSearch(g, pn, 0);
+            return DFSearch(pn, 0);
         }
 
-		public List<Node> DFSearch (Game g, int win, int depth)
+		public List<Node> DFSearch (int win, int depth)
 		{
 			if (IsVisited ())
 				return null;
@@ -199,7 +197,7 @@ namespace smallshogi
 			if(children != null)
 				foreach (var child in children)
 					if (child.pn == win) {
-					temp = child.DFSearch(g, win, depth+1);
+					temp = child.DFSearch(win, depth+1);
 					if(temp != null && sign * temp.Count > sign * bestL) {
 						best = temp;
 						bestL = best.Count;

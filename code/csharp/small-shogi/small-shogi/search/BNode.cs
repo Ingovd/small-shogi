@@ -16,7 +16,7 @@ namespace smallshogi.search
         public byte c;
         public int marker, value;
 
-        static int visitMarker = 0;
+        public static int visitMarker = 0;
 
         public BNode(Bits[] position, byte c)
         {
@@ -108,13 +108,13 @@ namespace smallshogi.search
             return this.marker == BNode.visitMarker;
         }
 
-        public List<BNode> GetLongestGame(Game g)
+        public List<BNode> GetLongestGame()
         {
             InitiateVisiting();
-            return DFSearch(g, value, 0);
+            return DFSearch(value, 0);
         }
 
-		public List<BNode> DFSearch (Game g, int win, int depth)
+		public List<BNode> DFSearch (int win, int depth)
 		{
 			if (IsVisited ())
 				return null;
@@ -127,7 +127,7 @@ namespace smallshogi.search
 			int bestL = - sign * int.MaxValue;
 			foreach (var child in children)
 				if (child.value == win) {
-				temp = child.DFSearch(g, win, depth+1);
+				temp = child.DFSearch(win, depth+1);
 				if(temp != null && sign * temp.Count > sign * bestL) {
 					best = temp;
 					bestL = best.Count;
