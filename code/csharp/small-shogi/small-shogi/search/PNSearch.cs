@@ -18,7 +18,10 @@ namespace smallshogi
 
 		public Node root;
         int timeLimit, timeSpent;
+
         bool graph;
+        public bool firstRun = true;
+        PNSearch second = null;
 
 		public PNSearch (bool graph)
 		{
@@ -59,7 +62,7 @@ namespace smallshogi
                 else
                 {
                     mpn.ExpandTree(g, ref  nodeCount);
-                    mpn.StartUpdateTree();
+                    mpn.StartUpdateTree(firstRun);
                 }
                 lastExpanded = mpn;
                 lastpn = mpn.pn;
@@ -73,7 +76,15 @@ namespace smallshogi
                 }
 			}
             sw.Stop();
-            timeSpent = (int) sw.ElapsedMilliseconds;
+            timeSpent = (int)sw.ElapsedMilliseconds;
+
+            // If this is the first run of a graph search where black loses, run again to check for draw
+            if (!graph && firstRun && root.dn == 0)
+            {
+                second = new PNSearch(false);
+                second.firstRun = false;
+                second.Prove(g);
+            }
 		}
 
 		public Node MostProving (Node v)

@@ -12,3 +12,10 @@ Debug/
 *.suo
 *.db
 
+*.aux
+*.bbl
+*.blg
+*.log
+*report.pdf
+*.vsp
+*.psess

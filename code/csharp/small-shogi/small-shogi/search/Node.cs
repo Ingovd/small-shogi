@@ -65,19 +65,27 @@ namespace smallshogi
 			UnVisit ();
         }
 
-		public void StartUpdateTree ()
+		public void StartUpdateTree (bool firstRun)
 		{
 			UpdateNumbers();
 
 			foreach(var parent in parents)
-				parent.UpdateTree (this);
+				parent.UpdateTree (this, firstRun);
 		}
 
-		public void UpdateTree (Node n)
+		public void UpdateTree (Node n, bool firstRun)
 		{
 			if (this.Equals (n)) {
-				n.pn = Int32.MaxValue;
-				n.dn = 0;
+                if (firstRun)
+                {
+                    n.pn = Int32.MaxValue;
+                    n.dn = 0;
+                }
+                else
+                {
+                    n.pn = 0;
+                    n.dn = Int32.MaxValue;
+                }
 				n.Update ();
 				return;
 			}
@@ -85,7 +93,7 @@ namespace smallshogi
 			UpdateNumbers();
 
 			foreach(var parent in parents)
-				parent.UpdateTree(n);
+				parent.UpdateTree(n, firstRun);
 		}
 
         public void UpdateNumbers()
