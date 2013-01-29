@@ -76,13 +76,16 @@ namespace smallshogi
 
 			for (int i = 0; i < 1372; i++) {
                 Search pngraph, pntree, bfs;
-                //pngraph = new PNSearch(true, 5);
+                pngraph = new PNSearch(true, 5);
                 pntree = new PNSearch(false, 5);
-                //bfs = new BFSearch(5);
+                bfs = new BFSearch(5);
 
-                //RunAndDump(pngraph, i);
+                RunAndDump(pngraph, i);
+                Console.WriteLine("PN on graph done");
                 RunAndDump(pntree, i);
-                //RunAndDump(bfs, i);
+                Console.WriteLine("PN on tree done");
+                RunAndDump(bfs, i);
+                Console.WriteLine("BFS on graph done");
 
                 Console.WriteLine("Done with seed " + i);
 				}

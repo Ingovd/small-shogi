@@ -75,6 +75,7 @@ namespace smallshogi
                     throw new Exception("Time limit exceeded");
                 }
 			}
+
             sw.Stop();
             timeSpent = (int)sw.ElapsedMilliseconds;
 
@@ -125,18 +126,27 @@ namespace smallshogi
 
         public int Value()
         {
-            return root.pn==0?1:root.dn==0?-1:0;
+            if (second == null)
+                return root.pn == 0 ? 1 : root.dn == 0 ? -1 : 0;
+            else
+                return root.pn == 0 ? 1 : (root.dn == 0 && second.root.dn == 0) ? -1 : 0;
         }
 
         public int TimeSpent()
         {
-            return timeSpent;
+            if (second == null)
+                return timeSpent;
+            else
+                return timeSpent + second.timeSpent;
         }
 
         public int NodeCount()
         {
             if (graph)
-                return transposition.Count;
+                if (second == null)
+                    return transposition.Count;
+                else
+                    return transposition.Count + second.transposition.Count;
             else
                 return nodeCount;
         }
