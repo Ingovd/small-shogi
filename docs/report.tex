@@ -9,12 +9,13 @@
 \newtheorem{mydef}{Definition}
 
 \title{Solving small shogi}
-\author{I. van Duijn \\ Utrecht University}
+\author{Ingo van Duijn \\ Utrecht University}
 \begin{document}
 \maketitle
 
-\section*{Abstract}
-%TODO
+\begin{abstract}
+This is an abstract.
+\end{abstract}
 
 \section{Introduction}
 Ever since the early days of modern computers there has been great interest in chess programming. Initial
@@ -25,11 +26,11 @@ many techniques from computer chess and applied them to their local chess varian
 Shogi (Japanese chess) is a game similar to western chess. It is played on a $9 \times 9$ board and every
 player has 20 pieces, some of which correspond to western pieces and others are slightly different.
 Black makes the opening move and both players aim to capture the opponent's king.
-The main difference between shogi and chess is the so called drop rule.
+The main difference between shogi and chess is the so called \emph{drop rule}.
 A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns
-(in stead moving a piece already on the board).
+(in stead of moving a piece already on the board).
 Additionally, in shogi nearly all pieces can promote upon moving to or from the promotion zone (starting ranks of opponent).
-Unlike western chess, each type of shogi piece can only promoted to one specific piece (e.g. bishop always promotes to a dragon horse).
+Unlike western chess, each type of shogi piece can only be promoted to one specific piece (e.g. bishop always promotes to a dragon horse).
 The drop rule, and to a lesser extent the promotion rule, dramatically increase the game tree complexity of shogi as compared to chess, see Table
 \ref{table:complex} for a comparison.\\
 \begin{table}
@@ -201,24 +202,147 @@ An unproved node can be an internal or leaf node of the search tree.
 
 To define the most proving node we need a notion of how close a node is of being proved.
 \begin{mydef}
-Given a search tree $(N, E)$, a set $P \subset N$ is called a proof set of a node $v \in N$ if proving all $w \in P$ will prove $v$.\\
-Similarly, a set $D$ is called a disproof set of a node $v$ if proving all $w \in D$ will disproof $v$.\\
-A (dis)proof set is called minimal if all its subsets are not (dis)proof sets.
+Given a search tree $(N, E)$, a set $P \subseteq N$ is called a proof set of a node $v \in N$ if proving all $w \in P$ will prove $v$.\\
+Similarly, a set $D$ is called a disproof set of a node $v$ if disproving all $w \in D$ will disprove $v$.\\
+A proof set is called atomic if all its proper subsets are no longer proof sets.\\
+Similarly, a disproof set is called atomic if all its proper subsets are no longer disproof sets.
 \end{mydef}
-In the search tree in figure \ref{tree:pnex}, the root has minimal proof sets $\{e, f\}$ and $\{h\}$,
-and minimal disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
+In the search tree in figure \ref{tree:pnex}, the root has proof sets $\{e, f\}$ and $\{h\}$,
+and  disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
 
 For OR nodes, only one of its children has to be proved in order to prove it. Consequently, there exists a set of nodes which is a minimal
 proof set for both the parent OR node as well as one of its children. A similar property holds for AND nodes and disproof sets.
 \begin{mydef}
-Given an unproved OR node $v$ and a subtree $T$ rooted at $w$, then $T$ is called the most promising branch if there exists a set of nodes $P$
-which is a smallest minimal proof set of $v$ and $w$. Simalarly if $v$ is an AND node, $T$ is most promising if $P$ is a smallest minimal disproof set.
+Let $(N, E)$ be a search tree and let $L \subseteq N$ be te set of all the unexpanded nodes.
+Given an unproved OR node $v$, there exists an atomic proof set $P \subseteq L$ such that for all proof sets $P' \subseteq L$, $|P| \leq |P'|$.
+By definition of OR node and proof set, there exists a child $w$ for which $P$ is also an atomic proof set; $w$ is called the most promising branch
+of $v$. A similar definition holds for AND nodes and disproof sets.
 \end{mydef}
 The most proving node is the first unexpanded node the algorithm encounters when successively selecting the most promising branch starting from
 the root.
 
 \subsubsection*{(Dis)proof numbers}
-Introduce proof numbers and some pseudo code for the algorithm.
+In the above description of the most proving node, we have seen that selecting the most promising branch differs for AND and OR nodes.
+In order to prove an AND node as fast as possible, we want to prove one of its children. OR nodes on the other hand, are more easily disproved than
+proved, so we want to disprove one of its children. We also see that all unproved leaf node of the search tree -- this includes the most proving
+node -- have a smallest minimal proof and disproof set only containing itself.
+
+These observations lead to the following procedure for finding the most proving node. Every node in the search tree will be labeled with the
+size of its smallest minimal (dis)proof set. The proof number of a node indicates the size of its minimal proof set and the disproof number
+the size of its minimal disproof set. Thus, unproved leaf nodes get a proof and disproof number of 1. We have already seen that AND nodes share
+a smallest minimal proof set with one of its children, so indeed the proof number of an AND node equals the smallest proof number of one of
+its children. Since all the children of an AND node need to be disproved for it to be disproved, the disproof number equals the sum of the disproof
+numbers of its children. Similarly, the disproof number of an OR node equals the smallest disproof number of its children and its proof number
+is the sum of the proof numbers of its children.
+
+The last thing we need to define is what happens with proved leaf nodes (i.e. terminal positions). Since a proved leaf node has an empty minimal proof set,
+its proof number is zero. As this node cannot be disproved anymore, we define its disproof number to be $\infty$. For disproved leaf nodes the reverse holds
+so its disproof number is zero and proof number $\infty$. Below is a summarization of the above definitions.
+\begin{figure}
+\begin{itemize}
+  \item If $v$ is an internal AND node:
+    \begin{align*}
+      v_{pn} &= \min_{s \in \text{child}_v} s_{pn}\\
+      v_{dn} &= \sum_{s \in \text{child}_v} s_{dn}
+    \end{align*}
+  \item If $v$ is an internal OR node:
+    \begin{align*}
+      v_{pn} &= \sum_{s \in \text{child}_v} s_{pn}\\
+      v_{dn} &= \min_{s \in \text{child}_v} s_{dn}
+    \end{align*}
+  \item If $v$ is a proved leaf node:\\
+    \begin{center}
+      $\left.
+      \begin{aligned}
+        v_{pn} &= 0 \quad \\
+        v_{dn} &= \infty
+      \end{aligned}
+      \right\}$ if black won in $v$\\
+      \hspace{0.7mm}$\left.
+      \begin{aligned}
+        v_{pn} &= \infty \\
+        v_{dn} &= 0 \quad
+      \end{aligned}
+      \right\}$ if white won in $v$
+    \end{center}
+  \item If $v$ is an unproved leaf node:
+    \begin{align*}
+      v_{pn} &= 1 \\
+      v_{dn} &= 1
+    \end{align*}
+\end{itemize}
+\label{pn:def}
+\caption{Definition of (dis)proof numbers}
+\end{figure}
+
+The algorithm to select the most proving node is now very straightforward.
+
+\theoremstyle{definition}
+\newtheorem{algorithm}{Algorithm}
+\begin{algorithm}[Select most proving node ($v$)]
+\hfill\par
+\begin{tabbing}
+  \textbf{while} \= $v$ is an internal node \\
+  \> \textbf{if} \= $v$ is an AND node\\
+  \> \> $v$ := leftmost child with equal proof number\\
+  \> \textbf{else} \\
+  \> \> $v$ := leftmost child with equal disproof number
+\end{tabbing}
+\end{algorithm}
+
+
+When the most proving node $v$ is reached, it is expanded and new nodes are generated. The (dis)proof number of $v$ might have
+changed so all the (dis)proof numbers of $v$ ancestors have to be updated. The procedure that updates the (dis)proof numbers
+follows directly from the definitions given in figure \ref{pn:def}.
+
+\begin{algorithm}[Update proof numbers ($v$)]
+\hfill\par
+\begin{tabbing}
+  \textbf{while} \= $v \not= \text{NIL}$\\
+  \> \textbf{if} \= $v$ is an AND node\\
+  \> \> $v_{pn} := \min_{s \in \text{child}_v} s_{pn}$\\
+  \> \> $v_{dn} := \sum_{s \in \text{child}_v} s_{dn}$\\
+  \> \textbf{else} \\
+  \> \> $v_{pn} := \sum_{s \in \text{child}_v} s_{pn}$\\
+  \> \> $v_{dn} := \min_{s \in \text{child}_v} s_{dn}$\\
+  \> $v$ := $\text{parent}_v$
+\end{tabbing}
+\end{algorithm}
+
+Selecting the most proving node and updating the proof numbers are the two fundamental features of proof number search. The final step
+that we need to define the complete algorithm is the expand function. A node's children are generated by applying the move generator
+to the position stored in the node. For every new position a child node is created with the correct pointers from parent to child
+and vice versa.
+
+\begin{algorithm}[Expand ($v$)]
+\hfill\par
+\begin{tabbing}
+  \textbf{for each} \= $w$ \textbf{in} Generate children ($v$)\\
+  \> $\text{parent}_w$ := $v$\\
+  \> Add $w$ to $\text{child}_v$\\
+  \> \textbf{if} \= $w$ is not a terminal position\\
+  \> \> $w_{pn} := 1$ and $w_{dn} := 1$\\
+  \> \textbf{else}\\
+  \> \> \textbf{if} \= black won in $w$\\
+  \> \> \> $w_{pn} := 0$ and $w_{dn} := \infty$\\
+  \> \> \textbf{else}\\
+  \> \> \> $w_{pn} := \infty$ and $w_{dn} := 0$\\
+\end{tabbing}
+\end{algorithm}
+
+\begin{algorithm}[Proof number search ($root$)]
+\hfill\par
+\begin{tabbing}
+  \textbf{while} \= $root_{pn} \not= 0 \land root_{dn} \not= 0$\\
+  \> $mpn$ := Select most proving node ($root$) \\
+  \> Expand ($mpn$)\\
+  \> Update proof numbers ($mpn$)\\
+  \textbf{if} \= $root_{pn} = 0$\\
+  \> \textbf{return} 1\\
+  \textbf{else}\\
+  \> \textbf{return} -1\\
+\end{tabbing}
+\end{algorithm}
 
 \subsection{Tree vs. Graph}
 So far we have discussed trees and how to prove nodes to have either value $1$ or $-1$. However there is a third outcome to shogi, draw. Though
