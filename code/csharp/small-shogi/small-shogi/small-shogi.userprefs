@@ -1,15 +1,13 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug|x86" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="search/BNode.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="Main.cs">
     <Files>
       <File FileName="pieces/Move.cs" Line="1" Column="1" />
       <File FileName="pieces/Piece.cs" Line="100" Column="50" />
-      <File FileName="Main.cs" Line="88" Column="4" />
+      <File FileName="Main.cs" Line="154" Column="1" />
       <File FileName="Game.cs" Line="85" Column="1" />
-      <File FileName="BitBoard.cs" Line="132" Column="1" />
       <File FileName="ply/MovePly.cs" Line="1" Column="1" />
-      <File FileName="ply/DropPly.cs" Line="23" Column="29" />
-      <File FileName="search/BNode.cs" Line="77" Column="1" />
+      <File FileName="DataReader.cs" Line="36" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
@@ -17,9 +15,8 @@
           <Node name="small-shogi" expanded="True">
             <Node name="pieces" expanded="True" />
             <Node name="ply" expanded="True" />
-            <Node name="search" expanded="True">
-              <Node name="BNode.cs" selected="True" />
-            </Node>
+            <Node name="search" expanded="True" />
+            <Node name="Main.cs" selected="True" />
           </Node>
         </State>
       </Pad>

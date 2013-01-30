@@ -11,6 +11,17 @@ namespace smallshogi
 	{
 		public static void Main (string[] args)
 		{
+			/*var pnt = new PNSearch (false, 10);
+			var game = new Game (new GameSetup (37));
+			pnt.Prove (game);
+			var bestgame = pnt.BestGame ();
+			foreach (var pos in bestgame) {
+				Console.WriteLine(game.prettyPrint(pos));
+			}*/
+
+
+			AnalyseData ();
+
 			//Game g = new Game (white, black, 4, 3, 1, pieces);
 			/*white [ 0] = Type.Bishop;
 			white [ 1] = Type.King;
@@ -76,16 +87,16 @@ namespace smallshogi
 
 			for (int i = 0; i < 1372; i++) {
                 Search pngraph, pntree, bfs;
-                pngraph = new PNSearch(true, 5);
+                //pngraph = new PNSearch(true, 5);
                 pntree = new PNSearch(false, 5);
-                bfs = new BFSearch(5);
+                //bfs = new BFSearch(5);
 
-                RunAndDump(pngraph, i);
-                Console.WriteLine("PN on graph done");
+                //RunAndDump(pngraph, i);
+                //Console.WriteLine("PN on graph done");
                 RunAndDump(pntree, i);
                 Console.WriteLine("PN on tree done");
-                RunAndDump(bfs, i);
-                Console.WriteLine("BFS on graph done");
+                //RunAndDump(bfs, i);
+                //Console.WriteLine("BFS on graph done");
 
                 Console.WriteLine("Done with seed " + i);
 				}
@@ -112,7 +123,31 @@ namespace smallshogi
             if (exception.Length > 0)
                 lines.Add("Exception:" + exception);
             lines.Add("");
-            File.AppendAllLines("Data\\" + seed + ".txt", lines);
+            File.AppendAllLines("Data/" + seed + ".txt", lines);
         }
+
+		public static void AnalyseData ()
+		{
+			List<String> lines = new List<string>();
+			DataReader dr = new DataReader("/home/ingo/UU/project/Data");
+			DataReader dr2 = new DataReader("/home/ingo/UU/project/Data2");
+			dr.ReadAll();
+			dr2.ReadAll();
+			dr.AdHocMergeData(dr2.data);
+			dr.SortData();
+			dr.FilterData(sc => sc.Count() < 100);
+			lines.Add ("Total games:     " + dr.data.Count);
+			var counts = dr.SolvedGameCount ();
+			lines.Add ("PN graph solved: " + counts.Item1); 
+			lines.Add ("PN tree solved:  " + counts.Item2); 
+			lines.Add ("BFS solved:      " + counts.Item3); 
+
+
+
+			foreach(var line in lines)
+				Console.WriteLine(line);
+
+			dr.FilterData(sc => sc.bfs.exception != null);
+		}
 	}
 }

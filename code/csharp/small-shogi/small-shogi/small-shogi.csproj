@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Main.cs" />
@@ -49,6 +50,7 @@
     <Compile Include="GameSetup.cs" />
     <Compile Include="search\BFSearch.cs" />
     <Compile Include="search\Search.cs" />
+    <Compile Include="DataReader.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup />

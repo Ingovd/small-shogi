@@ -82,7 +82,7 @@ namespace smallshogi
             // If this is the first run of a graph search where black loses, run again to check for draw
             if (!graph && firstRun && root.dn == 0)
             {
-                second = new PNSearch(false);
+                second = new PNSearch(false, timeLimit);
                 second.firstRun = false;
                 second.Prove(g);
             }
