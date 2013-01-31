@@ -361,17 +361,30 @@ A draw is a forced repitition of moves and as such it does not matter exactly ho
 if one repitition of moves can be forced, any number is possible. If we want to detect these repititons, a history of a position is needed. In trees this
 comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. Therefor if we use an actual tree internally
 to represent the search tree, we can easily detect repititions and stop the algorithm from searching any deeper than necessary.
-To evaluate drawing games we simply run our algorithm twice, the first time repeated positions are a loss for black and the second time for white.
+To evaluate drawing games we simply run proof number search twice, the first time repeated positions are a loss for black and the second time for white.
 The game is a draw if both runs show that the player who loses on draws also loses the game. Or alternatively, if a player has a winning strategy
 even when he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
 
-However, even with this modification transpositions still introduce a lot of nodes in the game tree with the same position. A possible solution
-is to represent the search tree internally as a graph. While completely solving the issue of duplicate positions, efficient draw detection becomes
-really hard. Additionally, since proof-number search was designed for trees, this also means the algorithm would have to be adapted.
-Though it has been shown that proof-number search can still perform quite good on directed acyclic graphs, on cyclic graphs the algorithm
-can give incorrect results ~\cite{TODO}.\\
+\begin{figure}
+\center
+\includegraphics[trim = 0mm 10cm 0cm 0cm, clip, width=9cm]{treevsgraph.pdf}
+\caption{DAG with corresponding tree.}
+\label{treevsgraph}
+\end{figure}
 
-Maybe explain what adaptations were necessary for the algorithm to work on graphs?
+Above mentioned method solves the problem of repititions, but not transpositions. This second type of duplicate positions in the game tree
+can still cause it to become very large. Figure \ref{treevsgraph} shows an example of a transposition. The so called \emph{join node} $d$ is
+reachable via $b$ as well as $c$. The tree representation containing this transposition shows that $d$ and all its children occur multiple times.
+If a node has join nodes amongst its ancestors in the DAG, it will
+occur multiple times in the corresponding tree. The number of times it will occur in the tree can even depend exponentially on the amount of join
+nodes.
+
+Representing the search tree internally as a graph prevents this exponential behaviour. While this completely solves the issue of duplicate
+positions, efficient draw detection becomes less trivial. Additionally, since proof-number search was designed for trees, this also means
+the algorithm would have to be adapted.
+Though it has been shown that proof-number search can still perform quite good on directed acyclic graphs without any adaptaion,
+on cyclic graphs it has to be adapted and can give incorrect results ~\cite{TODO}.\\
+%TODO: Describe three algorithms, how they represent game tree and how they prove a draw.
 
 \subsubsection*{Breadth-first search}
 To compare the results of proof-number search on graphs and trees
