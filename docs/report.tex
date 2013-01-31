@@ -69,7 +69,7 @@ altogether.
 
 One particular method, proof-number search, has been proved to be quite effective, even outperforming $\alpha\beta$-search~\cite{van2008proof} in
 proving the game theoretical value of a game tree. This method has also been succesfully applied to shogi mating
-problems~\cite{seo2001pn}~\cite{ueda2008weak}~\cite{sakuta2001performance}. We will discuss the viability of using proof-number search to solve variants of shogi and will test
+problems~\cite{seo2001pn, ueda2008weak, sakuta2001performance}. We will discuss the viability of using proof-number search to solve variants of shogi and will test
 this method on small shogi variants.
 
 \subsection{Contents}
@@ -129,28 +129,34 @@ node's value can be computed by taking the maximum or minimum of the children's 
 
 \begin{figure}[h]
 \center
-\begin{tikzpicture}[
-    all/.style={minimum width=.5cm, minimum height=.5cm},
-    and/.style={all, circle, draw},
-    or/.style={all, rectangle, draw},
-    term/.style={circle, draw=black, fill},
-]
-    \node [or, label=1] {} 
-        child { node [and, label=1] {} 
-                child { node [term, label=below:1] {} }
-                child { node [term, label=below:1] {} }
-                child { node [term, label=below:1] {} }
-        }
-        child {
-            node [and, label=-1] {}
-            child { node [term, label=below:-1] {} }
-            child { node [term, label=below:1] {} }
-        }
-    ;
-\end{tikzpicture}
+\includegraphics[width=10cm]{simpleminmax.pdf}
 \caption{Square AND nodes, circular OR and filled terminal nodes with their respective value.}
 \label{tree:simple}
 \end{figure}
+% \begin{figure}[h]
+% \center
+% \begin{tikzpicture}[
+    % all/.style={minimum width=.5cm, minimum height=.5cm},
+    % and/.style={all, circle, draw},
+    % or/.style={all, rectangle, draw},
+    % term/.style={circle, draw=black, fill},
+% ]
+    % \node [or, label=1] {} 
+        % child { node [and, label=1] {} 
+                % child { node [term, label=below:1] {} }
+                % child { node [term, label=below:1] {} }
+                % child { node [term, label=below:1] {} }
+        % }
+        % child {
+            % node [and, label=-1] {}
+            % child { node [term, label=below:-1] {} }
+            % child { node [term, label=below:1] {} }
+        % }
+    % ;
+% \end{tikzpicture}
+% \caption{Square AND nodes, circular OR and filled terminal nodes with their respective value.}
+% \label{tree:simple}
+% \end{figure}
 
 The most simple form of the minmax algorithm performs a depth-first expansion of the tree to calculate the value of the root. Proof-number search however
 expands the tree in a \textit{best-first} manner untill the root can be proved (i.e. determining its game theoretical value). The algorithm starts with a single
@@ -167,28 +173,34 @@ eventually leads to an unproved node, $h$ in the example, which we call the \tex
 
 \begin{figure}[h]
 \center
-\begin{tikzpicture}[
-    all/.style={minimum width=.5cm, minimum height=.5cm},
-    and/.style={all, circle, draw},
-    or/.style={all, rectangle, draw},
-    term/.style={circle, draw=black, fill},
-]
-    \node [or] {$a$} 
-        child { node [and] {$b$} 
-                child { node [or, label=below:1] {$d$} }
-                child { node [or, label=below:?] {$e$} }
-                child { node [or, label=below:?] {$f$} }
-        }
-        child {
-            node [and] {c}
-            child { node [or, label=below:1] {$g$} }
-            child { node [or, label=below:?] {$h$} }
-        }
-    ;
-\end{tikzpicture}
+\includegraphics[width=10cm]{proofset.pdf}
 \caption{Square AND nodes, circular OR, unproved nodes are labelled with a question mark.}
 \label{tree:pnex}
 \end{figure}
+% \begin{figure}[h]
+% \center
+% \begin{tikzpicture}[
+    % all/.style={minimum width=.5cm, minimum height=.5cm},
+    % and/.style={all, circle, draw},
+    % or/.style={all, rectangle, draw},
+    % term/.style={circle, draw=black, fill},
+% ]
+    % \node [or] {$a$} 
+        % child { node [and] {$b$} 
+                % child { node [or, label=below:1] {$d$} }
+                % child { node [or, label=below:?] {$e$} }
+                % child { node [or, label=below:?] {$f$} }
+        % }
+        % child {
+            % node [and] {c}
+            % child { node [or, label=below:1] {$g$} }
+            % child { node [or, label=below:?] {$h$} }
+        % }
+    % ;
+% \end{tikzpicture}
+% \caption{Square AND nodes, circular OR, unproved nodes are labelled with a question mark.}
+% \label{tree:pnex}
+% \end{figure}
 
 Before we introduce the algorithm, a formal description of the most proving node is required.\\
 The \textit{game tree} represents all possible ways to play the game. Whereas the \textit{search tree} is used by the algorithm
@@ -202,18 +214,19 @@ An unproved node can be an internal or leaf node of the search tree.
 
 To define the most proving node we need a notion of how close a node is of being proved.
 \begin{mydef}
-Given a search tree $(N, E)$, a set $P \subseteq N$ is called a proof set of a node $v \in N$ if proving all $w \in P$ will prove $v$.\\
+Given a search tree, let $N$ be the set of its nodes and $L \subseteq N$ be the set of unexpanded nodes. A set $P \subseteq L$ is called a proof set of a node $v \in N$ if proving all $w \in P$ will prove $v$.\\
 Similarly, a set $D$ is called a disproof set of a node $v$ if disproving all $w \in D$ will disprove $v$.\\
 A proof set is called atomic if all its proper subsets are no longer proof sets.\\
 Similarly, a disproof set is called atomic if all its proper subsets are no longer disproof sets.
+\label{def:pset}
 \end{mydef}
-In the search tree in figure \ref{tree:pnex}, the root has proof sets $\{e, f\}$ and $\{h\}$,
-and  disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
+In the search tree in figure \ref{tree:pnex}, the root has atmomic proof sets $\{e, f\}$ and $\{h\}$,
+and atomic disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
 
-For OR nodes, only one of its children has to be proved in order to prove it. Consequently, there exists a set of nodes which is a minimal
+For OR nodes, only one of its children has to be proved in order to prove it. Consequently, there exists a set of nodes which is an atomic
 proof set for both the parent OR node as well as one of its children. A similar property holds for AND nodes and disproof sets.
 \begin{mydef}
-Let $(N, E)$ be a search tree and let $L \subseteq N$ be te set of all the unexpanded nodes.
+Given a search tree, let $N$ and $L$ be as in Definition \ref{def:pset}.
 Given an unproved OR node $v$, there exists an atomic proof set $P \subseteq L$ such that for all proof sets $P' \subseteq L$, $|P| \leq |P'|$.
 By definition of OR node and proof set, there exists a child $w$ for which $P$ is also an atomic proof set; $w$ is called the most promising branch
 of $v$. A similar definition holds for AND nodes and disproof sets.
@@ -225,19 +238,19 @@ the root.
 In the above description of the most proving node, we have seen that selecting the most promising branch differs for AND and OR nodes.
 In order to prove an AND node as fast as possible, we want to prove one of its children. OR nodes on the other hand, are more easily disproved than
 proved, so we want to disprove one of its children. We also see that all unproved leaf node of the search tree -- this includes the most proving
-node -- have a smallest minimal proof and disproof set only containing itself.
+node -- have a smallest atomic proof and disproof set only containing itself.
 
 These observations lead to the following procedure for finding the most proving node. Every node in the search tree will be labeled with the
-size of its smallest minimal (dis)proof set. The proof number of a node indicates the size of its minimal proof set and the disproof number
-the size of its minimal disproof set. Thus, unproved leaf nodes get a proof and disproof number of 1. We have already seen that AND nodes share
-a smallest minimal proof set with one of its children, so indeed the proof number of an AND node equals the smallest proof number of one of
+size of its smallest atomic (dis)proof set. The proof number of a node indicates the size of its smallest atomic proof set and the disproof number
+the size of its smallest atomic disproof set. Thus, unproved leaf nodes get a proof and disproof number of 1. We have already seen that AND nodes share
+a smallest atomic proof set with one of its children, so indeed the proof number of an AND node equals the smallest proof number of one of
 its children. Since all the children of an AND node need to be disproved for it to be disproved, the disproof number equals the sum of the disproof
 numbers of its children. Similarly, the disproof number of an OR node equals the smallest disproof number of its children and its proof number
 is the sum of the proof numbers of its children.
 
-The last thing we need to define is what happens with proved leaf nodes (i.e. terminal positions). Since a proved leaf node has an empty minimal proof set,
+The last thing we need to define is what happens with proved leaf nodes (i.e. terminal positions). Since a proved leaf node has an empty atomic proof set,
 its proof number is zero. As this node cannot be disproved anymore, we define its disproof number to be $\infty$. For disproved leaf nodes the reverse holds
-so its disproof number is zero and proof number $\infty$. Below is a summarization of the above definitions.
+so its disproof number is zero and proof number $\infty$. In Figure \ref{pn:def} is a summarization of the above definitions.
 \begin{figure}
 \begin{itemize}
   \item If $v$ is an internal AND node:
@@ -271,6 +284,7 @@ so its disproof number is zero and proof number $\infty$. Below is a summarizati
       v_{dn} &= 1
     \end{align*}
 \end{itemize}
+%TODO fix this label
 \label{pn:def}
 \caption{Definition of (dis)proof numbers}
 \end{figure}
@@ -293,8 +307,8 @@ The algorithm to select the most proving node is now very straightforward.
 \end{samepage}
 
 When the most proving node $v$ is reached, it is expanded and new nodes are generated. The (dis)proof number of $v$ might have
-changed so all the (dis)proof numbers of $v$ ancestors have to be updated. The procedure that updates the (dis)proof numbers
-follows directly from the definitions given in figure \ref{pn:def}.
+changed so all the (dis)proof numbers of the ancestors of $v$ have to be updated. The procedure that updates the (dis)proof numbers
+follows directly from the definitions given in Figure \ref{pn:def}.
 
 \begin{samepage}
 \begin{algorithm}[Update proof numbers ($v$)]
@@ -353,22 +367,24 @@ and vice versa.
 
 \subsection{Tree vs. Graph}
 So far we have discussed trees and how to prove nodes to have either value $1$ or $-1$. However there is a third outcome to shogi, draw. Though
-very rare in full sized shogi, it can occur on small variants. Draw in shogi occurs if there has been a repitition
+very rare in full sized shogi, it can occur more often on small variants. Draw in shogi occurs if there has been a repitition
 of moves four times. Because of the drop rule \textit{any} position on the board can be repeated (repititions), moreover, different move
-sequences can lead to the same position (transposition). So strictly adhering to the drawing rule would result in immensely large game trees,
+sequences can lead to the same position (transposition). This means that strictly adhering to the drawing rule would result in immensely large game trees,
 even for the smallest variants.
+
 A draw is a forced repitition of moves and as such it does not matter exactly how many repititions are necessary according to the rules,
 if one repitition of moves can be forced, any number is possible. If we want to detect these repititons, a history of a position is needed. In trees this
 comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. Therefor if we use an actual tree internally
 to represent the search tree, we can easily detect repititions and stop the algorithm from searching any deeper than necessary.
-To evaluate drawing games we simply run proof number search twice, the first time repeated positions are a loss for black and the second time for white.
-The game is a draw if both runs show that the player who loses on draws also loses the game. Or alternatively, if a player has a winning strategy
-even when he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
+
+To evaluate games that can possibly draw, we simply run proof number search twice; the first time repeated positions are a loss for black and the second time for white.
+The game is a draw if both runs show that the player who loses on draws also loses the game. Or equivalently, if a player has a winning strategy
+even if he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
 
 \begin{figure}
 \center
 \includegraphics[trim = 0mm 10cm 0cm 0cm, clip, width=9cm]{treevsgraph.pdf}
-\caption{DAG with corresponding tree.}
+\caption{Directed acyclic graph with corresponding tree.}
 \label{treevsgraph}
 \end{figure}
 
@@ -382,8 +398,8 @@ nodes.
 Representing the search tree internally as a graph prevents this exponential behaviour. While this completely solves the issue of duplicate
 positions, efficient draw detection becomes less trivial. Additionally, since proof-number search was designed for trees, this also means
 the algorithm would have to be adapted.
-Though it has been shown that proof-number search can still perform quite good on directed acyclic graphs without any adaptaion,
-on cyclic graphs it has to be adapted and can give incorrect results ~\cite{TODO}.\\
+Though it has been shown that proof-number search can still perform quite good on directed acyclic graphs without any adaptation,
+on cyclic graphs it has to be adapted and can give incorrect results ~\cite{Schijf93}.\\
 %TODO: Describe three algorithms, how they represent game tree and how they prove a draw.
 
 \subsubsection*{Breadth-first search}
@@ -395,6 +411,7 @@ To compare the results of proof-number search on graphs and trees
 The first series of tests were performed on a $3 \times 3$ board with up to four pieces per player, always including exactly one king. To compensate
 for the small board, both the rook and the bishop can only move one square in their usual directions and they can not promote. Each player
 has four possible starting squares for their pieces. Eight different piece types led to an enumeration of 1372 different starting positions.
+See Appendix \ref{TODO} for a detailed description of the rules for the $3 \times 3$-variants.
 
 Explain behaviour of PN on both trees and graphs?\\
 %subsection: Elaborate on why PN fails on trees (splosion) and on graphs (algorithm breaks)
@@ -404,9 +421,9 @@ Show what happens with PN on a tree for children shogi, and relate this to japan
 
 \section{Discussion/conclusion}
 \begin{itemize}
-	\item Even very small instances of shogi are quite complex.
+	\item Even very small instances of shogi are quite complex, give figures on number of nodes in proven drawn games.
 	\item PN search not really fitted for non-destructive games
-	\item Are there other viable methods for proving small games? How do they differ from PN search?
+	\item Are there other viable methods for proving small games? How do they differ from PN search? Reduce nodes by domination simulation, then retrograde analysis.
 \end{itemize}
 
 \bibliography{cites}{}
