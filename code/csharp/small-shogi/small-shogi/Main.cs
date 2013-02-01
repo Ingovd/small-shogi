@@ -12,7 +12,8 @@ namespace smallshogi
 		public static void Main (string[] args)
 		{
 			/*var pnt = new PNSearch (false, 10);
-			var game = new Game (new GameSetup (37));
+			var game = new Game (new GameSetup (128));
+			Console.WriteLine(game.prettyPrint(game.startingPos));
 			pnt.Prove (game);
 			var bestgame = pnt.BestGame ();
 			foreach (var pos in bestgame) {
@@ -22,15 +23,22 @@ namespace smallshogi
 
 			AnalyseData ();
 
-			//Game g = new Game (white, black, 4, 3, 1, pieces);
-			/*white [ 0] = Type.Bishop;
-			white [ 1] = Type.King;
-			white [ 2] = Type.Rook;
-			//white [ 4] = Type.Pawn;
-			black [ 9] = Type.Rook;
-			black [10] = Type.King;
-			black [11] = Type.Bishop;
-			//black [ 7] = Type.Pawn;*/
+			/*GameSetup setup = new GameSetup (4, 3);
+			setup.SetPromotionRanks (1);
+			setup.AddWhitePiece (0, 0, Type.Bishop);
+			setup.AddWhitePiece (1, 0, Type.King);
+			setup.AddWhitePiece (2, 0, Type.Rook);
+			setup.AddWhitePiece (1, 1, Type.Pawn);
+			setup.AddBlackPiece (2, 3, Type.Bishop);
+			setup.AddBlackPiece (1, 3, Type.King);
+			setup.AddBlackPiece (0, 3, Type.Rook);
+			setup.AddBlackPiece (1, 2, Type.Pawn);
+			Game g = new Game(setup);
+			Console.WriteLine(g.prettyPrint(g.startingPos));
+			var pn = new PNSearch (false, 15);
+			pn.Prove (g);
+			pn.BestGame ();*/
+
 
 			/*GameSetup setup = new GameSetup (3, 3);
 			setup.SetPromotionRanks (1);
@@ -85,7 +93,7 @@ namespace smallshogi
 				}
 			}*/
 
-			for (int i = 0; i < 1372; i++) {
+			/*for (int i = 0; i < 1372; i++) {
                 Search pngraph, pntree, bfs;
                 //pngraph = new PNSearch(true, 5);
                 pntree = new PNSearch(false, 5);
@@ -99,7 +107,7 @@ namespace smallshogi
                 //Console.WriteLine("BFS on graph done");
 
                 Console.WriteLine("Done with seed " + i);
-				}
+				}*/
 			}
 
         public static void RunAndDump(Search s, int seed)
@@ -128,14 +136,21 @@ namespace smallshogi
 
 		public static void AnalyseData ()
 		{
-			List<String> lines = new List<string>();
-			DataReader dr = new DataReader("/home/ingo/UU/project/Data");
-			DataReader dr2 = new DataReader("/home/ingo/UU/project/Data2");
-			dr.ReadAll();
-			dr2.ReadAll();
-			dr.AdHocMergeData(dr2.data);
-			dr.SortData();
-			dr.FilterData(sc => sc.Count() < 100);
+			List<String> lines = new List<string> ();
+			DataReader dr = new DataReader ("/home/ingo/UU/project/Data");
+			DataReader dr2 = new DataReader ("/home/ingo/UU/project/Data2");
+			dr.ReadAll ();
+			dr2.ReadAll ();
+			dr.AdHocMergeData (dr2.data);
+			//dr.SortData ((first, second) => {
+			//	return second.Count ().CompareTo (first.Count ());});
+			//dr.SortData((first, second) => {return second.pngraph.count.CompareTo (first.pngraph.count);});
+			//dr.SortData((first, second) => {return second.bfs.count.CompareTo (first.bfs.count);});
+			dr.SortData((first, second) => {return second.pntree.count.CompareTo (first.pntree.count);});
+
+			dr.FilterData (sc => sc.Count () > 100);
+			dr.FilterData(sc => sc.pntree.count > 3000);
+
 			lines.Add ("Total games:     " + dr.data.Count);
 			var counts = dr.SolvedGameCount ();
 			lines.Add ("PN graph solved: " + counts.Item1); 
@@ -144,10 +159,18 @@ namespace smallshogi
 
 
 
-			foreach(var line in lines)
-				Console.WriteLine(line);
+			var pntn = dr.NodeCount ("pnt");
+			var pngn = dr.NodeCount ("png");
+			var bfsn = dr.NodeCount ("bfs");
 
-			dr.FilterData(sc => sc.bfs.exception != null);
+			lines.Add ("PN graph nodes: " + pntn); 
+			lines.Add ("PN tree nodes:  " + pngn); 
+			lines.Add ("BFS nodes:      " + bfsn); 
+
+			foreach (var line in lines)
+				Console.WriteLine (line);
+
+			dr.FilterData (sc => sc.pntree.value == 0);
 		}
 	}
 }

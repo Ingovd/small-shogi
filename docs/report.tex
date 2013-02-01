@@ -5,10 +5,10 @@
 \usepackage{tikz}
 \usetikzlibrary{arrows}
 
-\renewcommand{\arraystretch}{1.5}
+%\renewcommand{\arraystretch}{1.5}
 \newtheorem{mydef}{Definition}
 
-\title{Solving small shogi}
+\title{Solving small shogi}%TODO fix title
 \author{Ingo van Duijn \\ Utrecht University}
 \begin{document}
 \maketitle
@@ -23,14 +23,14 @@ focus in the west was mainly on chess and checkers, but when computers were well
 many techniques from computer chess and applied them to their local chess variant, shogi.
 
 \subsection{Shogi}
-Shogi (Japanese chess) is a game similar to western chess. It is played on a $9 \times 9$ board and every
+Shogi (Japanese chess\cite{shogibook}) is a game similar to western chess. It is played on a $9 \times 9$ board and every
 player has 20 pieces, some of which correspond to western pieces and others are slightly different.
 Black makes the opening move and both players aim to capture the opponent's king.
 The main difference between shogi and chess is the so called \emph{drop rule}.
 A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns
 (in stead of moving a piece already on the board).
 Additionally, in shogi nearly all pieces can promote upon moving to or from the promotion zone (starting ranks of opponent).
-Unlike western chess, each type of shogi piece can only be promoted to one specific piece (e.g. bishop always promotes to a dragon horse).
+Unlike western chess, each type of shogi piece can only be promoted to one specific type of piece (e.g. a bishop always promotes to a dragon horse).
 The drop rule, and to a lesser extent the promotion rule, dramatically increase the game tree complexity of shogi as compared to chess, see Table
 \ref{table:complex} for a comparison.\\
 \begin{table}
@@ -86,14 +86,14 @@ positions and computes their value.
 \subsection{Representation}
 As stated before, we have to be able to generically represent board positions. A well known technique in computer chess, bitboards, has been
 shown~\cite{grimbergen2007using} to be fairly effective in shogi as well. A bitboard is a bit pattern of (at least) the size of the board,
-in which each bit encodes some information (e.g. if it is occupied) about the corresponding square. Since the size of the bit pattern can
+in which each bit encodes some information (square, e.g. if it is occupied) about the corresponding square. Since the size of the bit pattern can
 easily be increased to accomodate larger boards, they are well suited for our purpose. Also, as will be explained later, they allow for easy
 generic move generation.
 
 In the current implementation, a position is represented by one bitboard per player per piece's move set (unpromoted and promoted), plus an additional
 bitboard per player containing the pieces in hand. Each bitboard corresponding to a certain piece's move set represents all pieces of that type
 owned by a specific player. For an $n \times m$ board, each bitboard is fitted in the smallest $nm \leq 2^k$-bit integer (for small
-variants $16$ or $32$ bit integers suffice). In figure \ref{bitboard} you can see an example configuration on a $3 \times 3$ board with the
+variants $16$ or $32$ bit integers suffice). In Figure \ref{bitboard} you can see an example configuration on a $3 \times 3$ board with the
 bitboard representing white's rooks.
 
 \begin{figure}[h]
@@ -105,7 +105,7 @@ bitboard representing white's rooks.
 
 To generate moves, we essentially need two things. We need to know for each individual piece where it is, and where it can move to in its current state.
 The location of each individual piece can easily be extracted from the bitboards representing a position. To determine where it can move to, a table
-is generated which maps position bitboards to move bitboards. In figure \ref{moveboard} is an example of all the possible moves of one of black's silver
+is generated which maps position bitboards to move bitboards. In Figure \ref{moveboard} is an example of all the possible moves of one of black's silver
 generals standing in the lower left corner.
 
 \begin{figure}[h]
@@ -122,6 +122,7 @@ With the move generator and the evaluation function in place, we have an implici
 theoretical value efficiently is only generating relevant parts of the tree.
 
 \subsection{Proof-number Search}
+\label{pnsearch}
 Proof-number search~\cite{allis1994proof} is an algorithm designed to find the game theoretical value of a game tree, or more specifically an AND/OR tree.
 The tree consists of a root, internal nodes and leaf nodes. Each node is either an AND (white to move) or an OR (black to move) node. By definition, a leaf
 node represents one player's victory and thus it has a nonzero value of $1$ (black won) or $-1$ (white won). As in the minmax algorithm, an internal
@@ -164,7 +165,8 @@ unproved node, the root. It then successively picks the most promising unproved 
 directly upon generation, unproved nodes are never terminal nodes and will have children nodes once they are expanded. 
 
 \subsubsection*{Most proving node}
-The tree in figure \ref{tree:pnex} has proved ($d$ and $g$) and unproved (the rest) nodes. Since the root $a$ is an OR node, it suffices
+The tree in Figure \ref{tree:pnex} has proved and unproved nodes. The nodes with a value are proved ($d$ and $g$) and the rest is unproved.
+Since the root $a$ is an OR node, it suffices
 to prove either $b$ or $c$. Both these nodes, being AND nodes, need the value of all their children before they can be proved. The sets of
 unproved children for $b$ and $c$ respectively are $\{e, f\}$ and $\{h\}$. For the root, in stead of saying that we need to prove
 either $b$ or $c$, we can also say we need to prove either $\{e, f\}$ or $\{h\}$. Since the latter set is smaller, it is more
@@ -220,7 +222,7 @@ A proof set is called atomic if all its proper subsets are no longer proof sets.
 Similarly, a disproof set is called atomic if all its proper subsets are no longer disproof sets.
 \label{def:pset}
 \end{mydef}
-In the search tree in figure \ref{tree:pnex}, the root has atmomic proof sets $\{e, f\}$ and $\{h\}$,
+In the search tree in Figure \ref{tree:pnex}, the root has atmomic proof sets $\{e, f\}$ and $\{h\}$,
 and atomic disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
 
 For OR nodes, only one of its children has to be proved in order to prove it. Consequently, there exists a set of nodes which is an atomic
@@ -312,6 +314,7 @@ follows directly from the definitions given in Figure \ref{pn:def}.
 
 \begin{samepage}
 \begin{algorithm}[Update proof numbers ($v$)]
+\label{alg:update}
 \hfill\par
 \begin{tabbing}
   \textbf{while} \= $v \not= \text{NIL}$\\
@@ -366,6 +369,7 @@ and vice versa.
 \end{samepage}
 
 \subsection{Tree vs. Graph}
+\label{sec:treegraph}
 So far we have discussed trees and how to prove nodes to have either value $1$ or $-1$. However there is a third outcome to shogi, draw. Though
 very rare in full sized shogi, it can occur more often on small variants. Draw in shogi occurs if there has been a repitition
 of moves four times. Because of the drop rule \textit{any} position on the board can be repeated (repititions), moreover, different move
@@ -381,7 +385,7 @@ To evaluate games that can possibly draw, we simply run proof number search twic
 The game is a draw if both runs show that the player who loses on draws also loses the game. Or equivalently, if a player has a winning strategy
 even if he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
 
-\begin{figure}
+\begin{figure}[h]
 \center
 \includegraphics[trim = 0mm 10cm 0cm 0cm, clip, width=9cm]{treevsgraph.pdf}
 \caption{Directed acyclic graph with corresponding tree.}
@@ -399,32 +403,86 @@ Representing the search tree internally as a graph prevents this exponential beh
 positions, efficient draw detection becomes less trivial. Additionally, since proof-number search was designed for trees, this also means
 the algorithm would have to be adapted.
 Though it has been shown that proof-number search can still perform quite good on directed acyclic graphs without any adaptation,
-on cyclic graphs it has to be adapted and can give incorrect results ~\cite{Schijf93}.\\
+on cyclic graphs it has to be adapted and can still give incorrect results ~\cite{Schijf93}.\\
 %TODO: Describe three algorithms, how they represent game tree and how they prove a draw.
 
-\subsubsection*{Breadth-first search}
-To compare the results of proof-number search on graphs and trees
+\subsection{Implementations}
+To test and compare the applicability of proof number search on small variants of shogi, taking into account the considerations on graphs and trees,
+three algorithms were implemented. Most importantly are two variants of proof number search. These are proof number search with the search tree
+represented as a tree and proof number-number search with the search tree represented as a graph.
+To relativate the results of these two algorithms, a simple breadth first search is also implemented.
 
-\section{Result}
+\paragraph{Proof-number search: tree.} This algorithm is exactly as explained in  as explained in Section \ref{pnsearch}. Draw is detected by running
+the algorithm twice; in the first run black loses in drawing situations and in the second run white loses in those situations.
+
+\paragraph{Proof-number search: graph.} In this variant the search tree is represented as a graph. The algorithm is the same except for the updating
+procedure given in Algorithm \ref{alg:update}. In stead of only updating one parent, all parents have to be updated. Therefor, after expanding a
+node $v$, all simple paths from $v$ to the root are updated. As trees are a special case of graphs, this is actually what also happens in the original
+algorithm. Draw is detected if the complete search tree is expanded and the game has not been proved.
+
+\paragraph{Breadth-first search.} As the name suggests, a simple breadth-first expansion of the search tree using the minimax method of determining
+the game theoretical value of nodes. For this algorithm we also use a graph representation. Simalar to the proof-number search variant, it
+updates all simple paths from the last expanded node $v$ to the root. It also detects draw by exhausting the search tree.
+
+\section{Results}
 %Compare results of the three algorithms (BFS, PN on graph, PN on tree) and explain the differences.\\
 %subsection: Point out where and why PN fails where BFS succeeds.
 The first series of tests were performed on a $3 \times 3$ board with up to four pieces per player, always including exactly one king. To compensate
 for the small board, both the rook and the bishop can only move one square in their usual directions and they can not promote. Each player
-has four possible starting squares for their pieces. Eight different piece types led to an enumeration of 1372 different starting positions.
+has four possible starting squares for their pieces as shown in Figure \ref{TODO}.
+Eight different piece types led to an enumeration of 1372 different starting positions.
 See Appendix \ref{TODO} for a detailed description of the rules for the $3 \times 3$-variants.
 
-Explain behaviour of PN on both trees and graphs?\\
-%subsection: Elaborate on why PN fails on trees (splosion) and on graphs (algorithm breaks)
+There are bound to be trivial games amongst the 1372 different starting positions. For instance, the king might be in check at the start, so since
+the game is symmetrical the starting player will win. To filter out these situations we will only look at the games which needed an
+average of 30 expanded nodes per algorithm to prove the value of the root. After filtering out the trivial games, 513 remain. Of these, 311 result
+in a win for black, 180 in a win for white and 22 games which result in a draw. Table \ref{table:3x3result} shows some results from running the three
+algorithms.
 
-Show what happens with PN on a tree for children shogi, and relate this to japanese result on solving it.
+\begin{table}[h]
+%TODO fix headers
+\begin{tabular}{l | c | c | c | c}
+ & instances solved & average nr. nodes & avg. png solved & avg non draw \\ \hline
+pnt & 513 & 5531 & 1312 & 5098\\
+png & 359 & 2790 & 889 & 2533\\
+bfs & 510 & 227336 & 62125 & 158340\\
+\end{tabular}
+\label{table:3x3result}
+\caption{Test results of running proof-number search with tree (pnt) and graph (png) representation and breadth-first search (bfs) on 513 $3 \times 3$
+instances.}
+\end{table}
+
+The results show that proof-number search on trees managed to solve every instance, while the graph variant solves considerably less. The
+breadth-first method only failed to prove three instances, in all cases because of memory constraints ($\pm8$ million nodes) in trying to prove a draw.
+Indeed, on average BFS expands several orders of magnitude more nodes than both PN variants. BFS used $\pm6.5$ million nodes to solve the hardest
+game, whereas PN-search with tree representation only needed $\pm295\,000$. Looking only at games which did not result in draw (i.e. games where
+BFS exhaustively searches the graph), BFS still consistently expands significantly more nodes than PN-search.
+
+The difference in nodes expanded between PN-search on tree or on graphs is not so drastical
+on this small scale; the graph variant uses about half of the tree variant (31029 vs. 58757 in the hardest game solved by using a graph).
+The difference in solving capability however is more pronounced. Of the hundred hardest games, a mere third was proved by the graph variant.
+One of the reasons PN-search fails on graphs is when the most proving node is not an unexpanded node. This happens when a node is part of a cycle
+and the only node left to complete its proof is itself. If such a node is selected, it will be selected in the next round as well, resulting
+in an infinite loop. As stated in Section \ref{sec:treegraph}, an adaptation of the PN-search algorithm has been proposed that (amongst others)
+solves this problem. However even that improved version of PN-search on cyclic graphs disfunctions in certain situations.
+
 %children shogi pns tree: how many nodes/collisions/etc.
+\paragraph{Animal shogi}
 
-\section{Discussion/conclusion}
+
+\section{Discussion}
+
+
 \begin{itemize}
 	\item Even very small instances of shogi are quite complex, give figures on number of nodes in proven drawn games.
 	\item PN search not really fitted for non-destructive games
 	\item Are there other viable methods for proving small games? How do they differ from PN search? Reduce nodes by domination simulation, then retrograde analysis.
 \end{itemize}
+
+\section{Appendix}
+\appendix
+\section{}
+Appendix?
 
 \bibliography{cites}{}
 \bibliographystyle{plain}

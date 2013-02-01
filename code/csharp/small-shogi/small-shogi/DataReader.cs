@@ -31,7 +31,7 @@ namespace smallshogi
 						dlines.Add (lines [j]);
 					}
 				}
-				data.Add(current);
+				data.Add (current);
 			}
 		}
 
@@ -40,46 +40,97 @@ namespace smallshogi
 			List<SolveCompare> newdata = new List<SolveCompare> ();
 			foreach (var scold in data) {
 				SolveCompare sc = new SolveCompare (scold.seed);
-				SolveCompare scnew = data2[scold.seed];
-				if(scnew.pngraph != null)
-					sc.AddDatum(scnew.pngraph);
+				SolveCompare scnew = data2 [scold.seed];
+				if (scnew.pngraph != null)
+					sc.AddDatum (scnew.pngraph);
 				else
-					sc.AddDatum(scold.pngraph);
-				if(scnew.pntree != null)
-					sc.AddDatum(scnew.pntree);
+					sc.AddDatum (scold.pngraph);
+				if (scnew.pntree != null)
+					sc.AddDatum (scnew.pntree);
 				else
-					sc.AddDatum(scold.pntree);
-				if(scnew.bfs != null)
-					sc.AddDatum(scnew.bfs);
+					sc.AddDatum (scold.pntree);
+				if (scnew.bfs != null)
+					sc.AddDatum (scnew.bfs);
 				else
-					sc.AddDatum(scold.bfs);
-				newdata.Add(sc);
+					sc.AddDatum (scold.bfs);
+				newdata.Add (sc);
 			}
 			data = newdata;
 		}
 
-		public void SortData ()
+		public void SortData (Comparison<SolveCompare> comparison)
 		{
-			data.Sort((first, second) => {return second.Count ().CompareTo(first.Count());});
+			data.Sort (comparison);
 		}
 
 		public void FilterData (Func<SolveCompare, bool> predicate)
 		{
-			data = data.Where(predicate).ToList();
+			data = data.Where (predicate).ToList ();
+		}
+
+		public Tuple<int, int, int, int, int> ResultCount ()
+		{
+			int error = 0;
+			int[] temp = new int[4];
+			foreach (var sc in data) {
+				int value = -2;
+				if (sc.pngraph.exception == null)
+					value = sc.pngraph.value;
+				if (sc.pntree.exception == null) {
+					if (value < -1)
+						value = sc.pntree.value;
+					else
+						if (value != sc.pntree.value) {
+						error++;
+						continue;
+					}
+				}
+				if (sc.bfs.exception == null) {
+					if (value < -1)
+						value = sc.bfs.value;
+					else
+						if (value != sc.bfs.value) {
+						error++;
+						continue;
+					}
+				}
+				temp[value + 2]++;
+			}
+			return Tuple.Create(temp[3], temp[1], temp[2], temp[0], error);
 		}
 
 		public Tuple<int, int, int> SolvedGameCount ()
 		{
-			int pngraphc = 0, pntreec = 0, bfsc = 0;
-			foreach (var sc in data) {
-				if(sc.pngraph.exception == null)
-					pngraphc++;
-				if(sc.pntree.exception == null)
-					pntreec++;
-				if(sc.bfs.exception == null)
-					bfsc++;
-			}
-			return Tuple.Create(pngraphc, pntreec, bfsc);
+				int pngraphc = 0, pntreec = 0, bfsc = 0;
+				foreach (var sc in data) {
+					if (sc.pngraph.exception == null)
+						pngraphc++;
+					if (sc.pntree.exception == null)
+						pntreec++;
+					if (sc.bfs.exception == null)
+						bfsc++;
+				}
+				return Tuple.Create (pngraphc, pntreec, bfsc);
+		}
+
+		public int NodeCount (string method)
+		{
+			Func<SolveCompare, int> f = sc => 0;
+				switch (method) {
+				case "pnt":
+					f = sc => sc.pntree.count;
+					break;
+				case "png":
+					f = sc => sc.pngraph.count;
+					break;
+				case "bfs":
+					f = sc => sc.bfs.count;
+					break;
+				}
+				int count = 0;
+				foreach (var sc in data)
+					count += f(sc);
+			return count;
 		}
 
 		Datum ReadDatum (List<string> lines)
@@ -108,8 +159,8 @@ namespace smallshogi
 						break;
 					}
 			}
-			Datum d = new Datum(type, value, time, count);
-			if(exception != null)
+			Datum d = new Datum (type, value, time, count);
+			if (exception != null)
 				d.exception = exception;
 			return d;
 		}
@@ -127,11 +178,11 @@ namespace smallshogi
 			public int Count ()
 			{
 				int count = 0;
-				if(pngraph != null && pngraph.exception == null)
+				if (pngraph != null && pngraph.exception == null)
 					count += pngraph.count;
-				if(pntree  != null && pntree.exception  == null)
+				if (pntree != null && pntree.exception == null)
 					count += pntree.count;
-				if(bfs     != null && bfs.exception     == null)
+				if (bfs != null && bfs.exception == null)
 					count += bfs.count;
 				return count;
 			}

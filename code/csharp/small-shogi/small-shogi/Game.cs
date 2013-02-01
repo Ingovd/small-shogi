@@ -231,7 +231,7 @@ namespace smallshogi
 		}
 
 		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, white win, black win
-		public int gamePosition (Bits[] position)
+		/*public int gamePosition (Bits[] position)
 		{
 			var kingIndex = index [Type.King];
 			if (position [kingIndex] == 0)
@@ -239,7 +239,7 @@ namespace smallshogi
 			if (position [kingIndex + l] == 0)
 				return 1;
 			return -1;
-		}
+		}*/
 
 		// Returns -1 if this is not a terminal position, 0, 1 or 2 for draw, white win, black win
 		public int gamePosition (Bits[] position, int c)
@@ -263,10 +263,10 @@ namespace smallshogi
 				return 1 + c;
 			}
 
-            if (B.Subset(position[kingIndex], promoMask[0]))
+            /*if (B.Subset(position[kingIndex], promoMask[0]))
                 return 1;
             if (B.Subset(position[kingIndex + l], promoMask[1]))
-                return 2;
+                return 2;*/
 
 			// This position is not terminal
 			return -1;
