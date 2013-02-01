@@ -2,7 +2,7 @@ using System;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
 
 	public abstract class Ply
 	{

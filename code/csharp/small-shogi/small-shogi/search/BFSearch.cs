@@ -6,7 +6,7 @@ using smallshogi.search;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
 
 	public class BFSearch : Search
 	{

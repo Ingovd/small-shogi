@@ -6,7 +6,7 @@ using smallshogi.search;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
 
 	public class PNSearch : Search
 	{
@@ -14,6 +14,7 @@ namespace smallshogi
 		public int nodeCount = 0;
 		public Node root;
 		int timeLimit, timeSpent;
+        int collisionCount = 0;
 		bool graph;
 		public bool firstRun = true;
 		PNSearch second = null;
@@ -38,6 +39,8 @@ namespace smallshogi
 			Node lastExpanded = null;
 			int lastpn = 0, lastdn = 0;
 
+            int count = 0;
+
 			Stopwatch sw = new Stopwatch ();
 			sw.Start ();
 			while (root.pn != 0 && root.dn != 0) {
@@ -56,8 +59,17 @@ namespace smallshogi
 					lastpn = mpn.pn;
 					lastdn = mpn.dn;
 				} else {
-					mpn.ExpandTree (g, ref  nodeCount);
+					mpn.ExpandTree (g, ref  nodeCount, ref collisionCount, transposition);
 					mpn.StartUpdateTree (firstRun);
+
+                    if (count % 10000 == 0)
+                    {
+                        Console.WriteLine("PN:         {0}\nDN:         {1}", root.pn, root.dn);
+                        Console.WriteLine("Collisions: " + collisionCount);
+                        Console.WriteLine("Nodes:      " + nodeCount);
+                    }
+
+                    count++;
 				}
 
 				if (sw.ElapsedMilliseconds > timeLimit * 60000) {

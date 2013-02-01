@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
 
 	public static class BitBoard
 	{
@@ -18,7 +18,7 @@ namespace smallshogi
 		/// </param>
 		public static Bits LSBit (Bits bits)
 		{
-			return bits & ~(bits - 1);
+			return (Bits)(bits & ~(bits - 1));
 		}
 
 		/// <summary>
@@ -33,9 +33,9 @@ namespace smallshogi
 		public static void PushMasked (ref Bits bits, Bits mask)
 		{
 			// Get masked value
-			var masked = bits & mask;
+			var masked = (bits & mask);
 			// Add pushed masked value (disregarding overflow, easily fixed by masking again)
-			bits |= (masked << 1) | LSBit (mask);
+			bits |= (Bits)((masked << 1) | LSBit (mask));
 		}
 
 		/// <summary>
@@ -50,11 +50,11 @@ namespace smallshogi
 		public static void PopMasked (ref Bits bits, Bits mask)
 		{
 			// Get masked value
-			var masked = bits & mask;
+			Bits masked = (Bits)(bits & mask);
 			// Remove it
 			bits ^= masked;
 			// Add popped masked value
-			bits |= (masked >> 1) & mask;
+			bits |= (Bits)((masked >> 1) & mask);
 		}
 
 		/// <summary>

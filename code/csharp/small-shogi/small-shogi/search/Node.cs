@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
     using B = BitBoard;
 
     public class Node
@@ -169,7 +169,7 @@ namespace smallshogi
             }
         }
 
-        public void ExpandTree(Game g, ref int nodeCount)
+        public void ExpandTree(Game g, ref int nodeCount, ref int collisionCount, Hashtable transposition)
         {
             if(children != null)
             	return;
@@ -180,6 +180,12 @@ namespace smallshogi
                 var s = new Node(ply.Apply(position, g), (byte)(c ^ 1));
                 s.Evaluate(g);
 				nodeCount++;
+
+                if (transposition.ContainsKey(s))
+                    collisionCount++;
+                else
+                    transposition.Add(s, s);
+
                 s.parents.Add(this);
                 children.Add(s);
             }

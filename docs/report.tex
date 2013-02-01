@@ -469,6 +469,21 @@ solves this problem. However even that improved version of PN-search on cyclic g
 %children shogi pns tree: how many nodes/collisions/etc.
 \paragraph{Animal shogi}
 
+\begin{table}
+\begin{tabular}{| l | c c c c |}
+\hline
+ Missing & Nodes & Collisions & PN & DN\\ \hline
+ None & 11\,011\,553 & 7\,584\,557 & 1\,298 & 1\,503\\
+ Pawn & 12\,309\,114 & 11\,402\,546 & 1\,117 & 2\,017\\
+ Bishop & 11\,176\,128 & 10\,091\,738 & 1\,003 & 1\,977\\
+ Rook & 10\,939\,358 & 10\,298\,080 & 1\,200 & 1\,816\\
+ Pawn \& Bishop & 4\,130\,631 & 4\,110\,635 & $\infty$ & 0\\
+ Bishop \& Rook & 38\,879 & 27\,639 & 0 & $\infty$\\
+ Pawn \& Rook & 28\,952 & 25\,152 & $\infty$ & 0\\
+ Pawn \& Bishop \& Rook & 63 & 0 & 0 & $\infty$\\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Discussion}
 

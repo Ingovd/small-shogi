@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
     using B = BitBoard;
 
 	public class Game
@@ -147,9 +147,9 @@ namespace smallshogi
 			var plies = new List<Ply> ();
 
 			// Calculate all squares not occupied by pieces of colour c
-			var notCPieces = (~colourPieces (position, c)) & (uint)((1 << files*columns) - 1);
+			Bits notCPieces = (Bits)((~colourPieces (position, c)) & ((1 << files*columns) - 1));
 			// Calculate all squares occupied by pieces of colour (c ^ 1)
-			var enemyPieces = colourPieces (position, (c ^ 1));
+			Bits enemyPieces = colourPieces (position, (c ^ 1));
 
 			// Loop through each piece type
 			for (int p = 0; p < l; ++p) {
@@ -177,7 +177,7 @@ namespace smallshogi
 			Bits hand = position [2 * l + c];
 			// If it is not empty calculate empty squares
 			if (hand != 0) {
-				var all = notCPieces ^ (enemyPieces);
+				Bits all = (Bits)(notCPieces ^ (enemyPieces));
 				// Loop through all piece types
 				foreach (var pieceMask in handMask) {
 					// Check if the player has this piece
@@ -263,10 +263,10 @@ namespace smallshogi
 				return 1 + c;
 			}
 
-            /*if (B.Subset(position[kingIndex], promoMask[0]))
+            if (B.Subset(position[kingIndex], promoMask[0]))
                 return 1;
             if (B.Subset(position[kingIndex + l], promoMask[1]))
-                return 2;*/
+                return 2;
 
 			// This position is not terminal
 			return -1;
@@ -320,7 +320,7 @@ namespace smallshogi
 			if (hand != 0) {
 				foreach (var pieceMask in handMask) {
 					hand = position [2 * l];
-                    foreach (var p in B.allOnes(hand & pieceMask.Value))
+                    foreach (var p in B.allOnes((Bits)(hand & pieceMask.Value)))
 						s += Piece.showType (pieces [pieceMask.Key].type);
 				}
 			}
@@ -345,7 +345,7 @@ namespace smallshogi
 			if (hand != 0) {
 				foreach (var pieceMask in handMask) {
 					hand = position [2 * l + 1];
-                    foreach (var p in B.allOnes(hand & pieceMask.Value))
+                    foreach (var p in B.allOnes((Bits)(hand & pieceMask.Value)))
 						s += Piece.showType (pieces [pieceMask.Key].type);
 				}
 			}

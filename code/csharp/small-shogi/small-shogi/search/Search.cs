@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace smallshogi.search
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
 
     public interface Search
     {

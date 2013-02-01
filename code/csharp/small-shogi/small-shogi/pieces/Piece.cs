@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace smallshogi
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
     using B = BitBoard;
 
 	public enum Type

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace smallshogi.search
 {
-    using Bits = System.UInt32;
+    using Bits = System.UInt16;
     using B = BitBoard;
 
     public class BNode
