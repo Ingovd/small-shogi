@@ -21,6 +21,7 @@ small variants of shogi. Both an unadapted and an adapted version of this method
 of the minimax algorithm on $3 \times 3$ boards, though the adapted version solves less instances. On a larger $3 \times 4$ variant, both versions
 do not look promising. The unadapted version could not handle the combinatorial explosion the drop rule introduced. The adapted version solves this
 by representing the game tree as a graph, however proof-number search does not work well on graphs. 
+%TODO finishing sentence
 \end{abstract}
 
 \section{Introduction}
@@ -53,7 +54,7 @@ Game-tree complexity & $10^{123}$ & $10^{226}$ & $10^{360}$ \\ \hline
 \subsection{Computer shogi}
 Like computer chess, computer shogi is an active field of research~\cite{iida2002computer}. The main interest is how we can program computers 
 such that their play peers with -- and eventually even surpasses -- human professional players. Shogi, being complexer
-than western chess, has a game tree too large to make exhaustive search even near feasible. Consequently, research
+than western chess, has a game tree much too large for exhaustive search. Consequently, research
 focusses on clever ways to search the game tree in order to find a good heuristic. Many techniques from computer chess
 have been employed, but the drop rule introduced such a novelty that new shogi-specific techniques had to be developed.\\
 
@@ -89,17 +90,17 @@ proof-number search for use with shogi.
 
 \section{Method}
 We are dealing with generic small sized shogi variants, so representation and algorithms employed have to be sufficiently generic as well.
-A small shogi variant is defined by the size of the board, the initial configuration of black (white's is $180^{\circ}$ rotationally symmetrical) and
-the size of the promotion zone. The initial configuration consists of a set of pieces, each of which has one or two move sets (taking into account
-promotion). Any algorithm that aims to prove the game theoretical value of a variant then only has to have access to two functions based on this
+A small shogi variant is defined by the size of the board, the initial configuration of black, for white's is $180^{\circ}$ rotationally symmetrical, and
+the size of the promotion zone. The initial configuration consists of a set of pieces, each of which has one or two move sets; a normal move set and
+its promoted move set. An algorithm that aims to prove the game theoretical value of such a shogi variant only has to have access to two functions based on this
 definition: a move generator which can map positions to a set of successing positions, and an evaluation function which recognises terminal
 positions and computes their value.
 
 \subsection{Representation}
 \label{sec:rep}
 As stated before, we have to be able to generically represent board positions. A well known technique in computer chess, bitboards, has been
-shown~\cite{grimbergen2007using} to be fairly effective in shogi as well. A bitboard is a bit pattern of (at least) the size of the board,
-in which each bit encodes some information (square, e.g. if it is occupied) about the corresponding square.
+shown~\cite{grimbergen2007using} to be fairly effective in shogi as well. A bitboard is a bit pattern of at least the size of the board,
+in which each bit encodes some information about the corresponding square, e.g. if it is occupied.
 Figure \ref{bitsquares} shows the correspondence between squares and bits, zero being the least significant bit.
 Since the size of the bit pattern can
 easily be increased to accomodate larger boards, they are well suited for our purpose. Also, as will be explained later, they allow for easy
@@ -112,11 +113,12 @@ generic move generation.
 \label{bitsquares}
 \end{figure}
 
-In the current implementation, a position is represented by one bitboard per player per piece's move set (unpromoted and promoted), plus an additional
-bitboard per player containing the pieces in hand. Each bitboard corresponding to a certain piece's move set represents all pieces of that type
-owned by a specific player. For an $n \times m$ board, each bitboard is fitted in the smallest $nm \leq 2^k$-bit integer (for small
-variants $16$ or $32$ bit integers suffice). In Figure \ref{bitboard} you can see an example configuration on a $3 \times 3$ board with the
-bitboard representing black's pawns.
+In the current implementation, a position is represented by the following: per player one bitboard for every piece's normal and possibly promoted move set, 
+additional to one bitboard for both players containing the pieces in hand, viz. pieces that can be dropped by that player.
+Each bitboard corresponding to a certain piece's move set represents all pieces of that type
+owned by a specific player. Figure \ref{bitboard} shows an example configuration on a $3 \times 3$ board with the
+bitboard representing black's pawns. For an $n \times m$ board, each bitboard is fitted in the smallest $nm \leq 2^k$-bit integer, so for small
+variants $16$ or $32$ bit integers suffice.
 
 \begin{figure}[h]
 \center
@@ -131,15 +133,15 @@ bitboard representing black's pawns.
 \end{figure}
 
 To generate moves, we essentially need two things. We need to know for each individual piece where it is, and where it can move to in its current state.
-The location of each individual piece can easily be extracted from the bitboards representing a position. To determine where it can move to, a table
+The location of each individual piece can be extracted from the bitboard corresponding to that piece's type. To determine where it can move to, a table
 is generated which maps position bitboards to move bitboards. In Figure \ref{moveboard} is an example of all the possible moves of one of black's silver
-generals positioned on b3.
+generals positioned on b3. These tables are generated beforehand and are the basis of the move generator.
 
 \begin{figure}[h]
 \center
     \mbox{
-      \subfigure[A silver general owned by black]{\includegraphics{blacksilver.pdf}} \quad
-      \subfigure[All possible moves of the silver general]{\includegraphics{blacksilvermove.pdf}}
+      \subfigure[A silver general owned by black]{\label{blacksilver}\includegraphics{blacksilver.pdf}} \quad
+      \subfigure[All possible moves of the silver general]{]label{blacksilvermove}\includegraphics{blacksilvermove.pdf}}
       }
 \caption{A silver general positioned on b3 can move to a3, a2 and c2.}
 \label{moveboard}
@@ -153,8 +155,8 @@ theoretical value efficiently is only generating relevant parts of the tree.
 
 \subsection{Proof-number Search}
 \label{pnsearch}
-Proof-number search~\cite{allis1994proof} is an algorithm designed to find the game theoretical value of a game tree, or more specifically an AND/OR tree.
-The tree consists of a root, internal nodes and leaf nodes. Each node is either an AND (white to move) or an OR (black to move) node. By definition, a leaf
+Proof-number search~\cite{allis1994proof}, or PN-search, is an algorithm designed to find the game theoretical value of a game tree, or more specifically an AND/OR tree.
+The tree consists of a root, internal nodes and leaf nodes. Each node is either an AND (white to move) or an OR node (black to move). By definition, a leaf
 node represents one player's victory and thus it has a nonzero value of $1$ (black won) or $-1$ (white won). As in the minmax algorithm, an internal
 node's value can be computed by taking the maximum or minimum of the children's value for AND and OR nodes respectively (Figure \ref{tree:simple}).
 
@@ -192,7 +194,7 @@ node's value can be computed by taking the maximum or minimum of the children's 
 The most simple form of the minmax algorithm performs a depth-first expansion of the tree to calculate the value of the root. Proof-number search however
 expands the tree in a \textit{best-first} manner untill the root can be proved (i.e. determining its game theoretical value). The algorithm starts with a single
 unproved node, the root. It then successively picks the most promising unproved node and expands it, i.e. generating its children. Since terminal nodes are proved
-directly upon generation, unproved nodes are never terminal nodes and will have children nodes once they are expanded. 
+directly upon generation, unproved nodes are never terminal and will have children once they are expanded. 
 
 \subsubsection*{Most proving node}
 The tree in Figure \ref{tree:pnex} has proved and unproved nodes. The nodes with a value are proved ($d$ and $g$) and the rest is unproved.
@@ -201,7 +203,7 @@ to prove either $b$ or $c$. Both these nodes, being AND nodes, need the value of
 unproved children for $b$ and $c$ respectively are $\{e, f\}$ and $\{h\}$. For the root, in stead of saying that we need to prove
 either $b$ or $c$, we can also say we need to prove either $\{e, f\}$ or $\{h\}$. Since the latter set is smaller, it is more
 promising trying to prove $c$ than it is to prove $b$. Repeating this argument for determining the most promising branch of the tree
-eventually leads to an unproved node, $h$ in the example, which we call the \textit{most proving node}.
+eventually leads to an unproved node, $h$ in the example, which we call the \textit{most proving node}.\\
 
 \begin{figure}[h]
 \center
@@ -239,7 +241,7 @@ The \textit{game tree} represents all possible ways to play the game. Whereas th
 and only contains a portion of the game tree relevant for proving the root. The search tree grows as the algorithm expands nodes and
 unproved expanded nodes are eventually either proved or disproved.
 \begin{mydef}
-If a node is proved it has the game theoretical value $1$, indicating a win for the beginning player (Black).
+If a node is proved it has game theoretical value $1$, indicating a win for the beginning player (Black).
 Conversely, if a node is disproved it has value $-1$ and indicates a win for the opponent (White).
 An unproved node can be an internal or leaf node of the search tree.
 \end{mydef}
@@ -252,7 +254,7 @@ A proof set is called atomic if all its proper subsets are no longer proof sets.
 Similarly, a disproof set is called atomic if all its proper subsets are no longer disproof sets.
 \label{def:pset}
 \end{mydef}
-In the search tree in Figure \ref{tree:pnex}, the root has atmomic proof sets $\{e, f\}$ and $\{h\}$,
+In the search tree in Figure \ref{tree:pnex}, the root has atomic proof sets $\{e, f\}$ and $\{h\}$,
 and atomic disproof sets $\{e, h\}$ and $\{f, h\}$. All supersets of these (dis)proof sets are also (dis)proof sets of course.
 
 For OR nodes, only one of its children has to be proved in order to prove it. Consequently, there exists a set of nodes which is an atomic
@@ -273,7 +275,7 @@ proved, so we want to disprove one of its children. We also see that all unprove
 node -- have a smallest atomic proof and disproof set only containing itself.
 
 These observations lead to the following procedure for finding the most proving node. Every node in the search tree will be labeled with the
-size of its smallest atomic (dis)proof set. The proof number of a node indicates the size of its smallest atomic proof set and the disproof number
+size of its smallest atomic proof and disproof set. The proof number of a node indicates the size of its smallest atomic proof set and the disproof number
 the size of its smallest atomic disproof set. Thus, unproved leaf nodes get a proof and disproof number of 1. We have already seen that AND nodes share
 a smallest atomic proof set with one of its children, so indeed the proof number of an AND node equals the smallest proof number of one of
 its children. Since all the children of an AND node need to be disproved for it to be disproved, the disproof number equals the sum of the disproof
@@ -382,6 +384,8 @@ and vice versa.
 \end{algorithm}
 \end{samepage}
 
+%TODO introduce final algorithm?
+
 \begin{samepage}
 \begin{algorithm}[Proof number search ($root$)]
 \hfill\par
@@ -411,7 +415,7 @@ if one repitition of moves can be forced, any number is possible. If we want to 
 comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. Therefor if we use an actual tree internally
 to represent the search tree, we can easily detect repititions and stop the algorithm from searching any deeper than necessary.
 
-To evaluate games that can possibly draw, we simply run proof number search twice; the first time repeated positions are a loss for black and the second time for white.
+To evaluate games that can possibly draw, we simply run PN-search twice; the first time repeated positions are a loss for black and the second time for white.
 The game is a draw if both runs show that the player who loses on draws also loses the game. Or equivalently, if a player has a winning strategy
 even if he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
 
@@ -487,7 +491,7 @@ The results show that proof-number search on trees managed to solve every instan
 breadth-first method only failed to prove three instances, in all cases because of memory constraints ($\pm8$ million nodes) in trying to prove a draw.
 Indeed, on average BFS expands several orders of magnitude more nodes than both PN variants. BFS used $\pm6.5$ million nodes to solve the hardest
 game, whereas PN-search with tree representation only needed $\pm295\,000$. Looking only at games which did not result in draw (i.e. games where
-BFS exhaustively searches the graph), BFS still consistently expands significantly more nodes than PN-search.
+BFS does not exhaustively searches the graph), BFS still consistently expands significantly more nodes than PN-search.
 
 The difference in nodes expanded between PN-search on tree or on graphs is not so drastical
 on this small scale; the graph variant uses about half of the tree variant (31029 vs. 58757 in the hardest game solved by using a graph).
@@ -499,7 +503,7 @@ node as most proving, which resulted in a loop.
 board with a king, rook, bishop and pawn for each player.
 The game is similar to the smaller $3 \times 3$ variant with the additional rule that reaching the promotion zone with your king wins you the game.
 The full set of rules is explained in Appendix \ref{dobutsu}. This variant has been strongly solved
-\ref{TODO}, so it is a good test subject. The game has $\pm1.5$ billion reachable positions, which means that the game tree represented as a graph has exactly
+\cite{tetsuroanimal}, so it is a good test subject. The game has $\pm1.5$ billion reachable positions, which means that the game tree represented as a graph has exactly
 this amount of nodes. It has been shown that white has a winning strategy. The longest game in which black
 delays loss as long as possible and white tries to win as fast as possible has 78 plies; 39 moves per player. 
 
@@ -515,14 +519,14 @@ the algorithm would quickly proof the root once both proof and disproof numbers 
 \begin{tabular}{| l | c c c c |}
 \hline
  Missing & Nodes & Collisions & PN & DN\\ \hline
- None                   & 11\,011\,553  & 68.88\% & 1\,298 & 1\,503\\
- Pawn                   & 12\,309\,114  & 92.63\% & 1\,117 & 2\,017\\
- Bishop                 & 11\,176\,128  & 90.30\% & 1\,003 & 1\,977\\
- Rook                   & 10\,939\,358  & 94.14\% & 1\,200 & 1\,816\\
+ None                   & 11\,011\,553  & 68.88\% & 1\,298   & 1\,503\\
+ Pawn                   & 12\,309\,114  & 92.63\% & 1\,117   & 2\,017\\
+ Bishop                 & 11\,176\,128  & 90.30\% & 1\,003   & 1\,977\\
+ Rook                   & 10\,939\,358  & 94.14\% & 1\,200   & 1\,816\\
  Pawn \& Bishop         & 4\,130\,631   & 99.52\% & $\infty$ & 0\\
- Bishop \& Rook         & 38\,879       & 71.09\% & 0 & $\infty$\\
+ Bishop \& Rook         & 38\,879       & 71.09\% & 0        & $\infty$\\
  Pawn \& Rook           & 28\,952       & 86.87\% & $\infty$ & 0\\
- Pawn \& Bishop \& Rook & 63            & 0\% & 0 & $\infty$\\
+ Pawn \& Bishop \& Rook & 63            & 0\%      & 0       & $\infty$\\
 \hline
 \end{tabular}
 \caption{Test results of PN-search on Animal shogi.}
@@ -555,7 +559,26 @@ solves this problem. However even that improved version of PN-search on cyclic g
 {\appendix
 \section{Shogi on a $3 \times 3$ board.}
 \label{3x3rules}
-%TODO
+These shogi variants are played on a $3 \times 3$ board, each player has up to four pieces always including a king and wins by capturing the enemy's king.
+The starting positions for each player are shown in Figure \ref{startingpos}. A player's promotion zone is the furthest rank opposed to its pieces starting location.
+\begin{figure}[h]
+\center
+\includegraphics{smallsetup.pdf}
+\caption{Black pieces point up, white pieces point down}
+\label{startingpos}
+\end{figure}
+
+\paragraph{Promotion.} If a player moves a piece to, from or in the promotion zone he may chose to promote that piece if it can be promoted. If a piece has no more legal moves
+(e.g. a pawn moving to the last rank) then it has to be promoted. A piece loses its current move set and gains the promoted move set upon promotion. A promoted piece can never
+promote.
+
+\paragraph{Drop rule.} If a player captures a piece of the enemy, he takes the captured piece in its hand. In one of its subsequent turns, in stead of moving one of his
+pieces on the board, he might choose to place one of the pieces in his hand on the board. He can only place pieces on vacant squares. It is not allowed to place a piece
+on the board such that it has no more legal moves, e.g. placing a pawn on the last rank is forbidden. If a piece is dropped in the promotion
+
+\paragraph{Pieces.} There are eight different pieces, each with a unique move set. Some pieces can promote while others can not.
+
+
 
 \section{Animal shogi}
 \label{dobutsu}
