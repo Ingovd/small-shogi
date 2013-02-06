@@ -1,5 +1,5 @@
-\documentclass{article}
-\usepackage{graphicx, subfigure, multirow}
+\documentclass[a4paper, 11pt]{article}
+\usepackage{graphicx, subfigure, multirow, tabularx}
 \usepackage{amsmath,cite}
 \usepackage{amsthm}
 \usepackage{tikz}
@@ -8,20 +8,21 @@
 %\renewcommand{\arraystretch}{1.5}
 \newtheorem{mydef}{Definition}
 
-\title{Solving small shogi}%TODO fix title
+\title{Proof numbers and small shogi variants}
 \author{Ingo van Duijn \\ Utrecht University}
+\date{}
 \begin{document}
 \maketitle
 
 \begin{abstract}
-Shogi is a popular chess variant in Japan. Though similar to chess, in shogi the drop rule allows captured pieces to be dropped on the board by the captor. As such,
-not all techniques from computer chess work equally well on shogi. Techniques have to be adapted or new ones tailored
+Shogi is a popular chess variant in Japan. Though similar to chess, in shogi the drop rule allows captured pieces to be dropped on the board by the captor.
+As such, not all techniques from computer chess work equally well on shogi. Techniques have to be adapted or new ones tailored
 to be suited for shogi. In this paper we will investigate the viability of using proof-number search to find the game theoretical value of
 small variants of shogi. Both an unadapted and an adapted version of this method will be described. Both version outperformed a basic implementation
 of the minimax algorithm on $3 \times 3$ boards, though the adapted version solves less instances. On a larger $3 \times 4$ variant, both versions
 do not look promising. The unadapted version could not handle the combinatorial explosion the drop rule introduced. The adapted version solves this
-by representing the game tree as a graph, however proof-number search does not work well on graphs. 
-%TODO finishing sentence
+by representing the game tree as a graph, however proof-number search does not work well on graphs. Further adaptations are necessary before
+proof-number search becomes viable for small variants of shogi.
 \end{abstract}
 
 \section{Introduction}
@@ -35,17 +36,19 @@ player has 20 pieces, some of which correspond to western pieces and others are 
 Black makes the opening move and both players aim to capture the opponent's king.
 The main difference between shogi and chess is the so called \emph{drop rule}.
 A piece that is captured by a player now belongs to him and can be placed on \textit{any} vacant square in one of his subsequent turns
-(in stead of moving a piece already on the board).
+(instead of moving a piece already on the board).
 Additionally, in shogi nearly all pieces can promote upon moving to or from the promotion zone (starting ranks of opponent).
 Unlike western chess, each type of shogi piece can only be promoted to one specific type of piece (e.g. a bishop always promotes to a dragon horse).
 The drop rule, and to a lesser extent the promotion rule, dramatically increase the game tree complexity of shogi as compared to chess, see Table
 \ref{table:complex} for a comparison.\\
 \begin{table}
 \center
+\def\arraystretch{1.5}
 \begin{tabular}{l l l l}
- & Chess & Shogi & Go \\ \hline
+ & Chess & Shogi & Go \\\hline
 State-space complexity & $10^{43}$ & $10^{71}$ & $10^{172}$ \\
-Game-tree complexity & $10^{123}$ & $10^{226}$ & $10^{360}$ \\ \hline
+Game-tree complexity & $10^{123}$ & $10^{226}$ & $10^{360}$ \\
+\hline
 \end{tabular}
 \caption{The complexities of chess, shogi and go}
 \label{table:complex}
@@ -58,25 +61,26 @@ than western chess, has a game tree much too large for exhaustive search. Conseq
 focusses on clever ways to search the game tree in order to find a good heuristic. Many techniques from computer chess
 have been employed, but the drop rule introduced such a novelty that new shogi-specific techniques had to be developed.\\
 
-Unlike in western chess, end game situations
+Unlike in western chess, endgame situations
 in shogi are not significantly less complex than mid game situations. In fact, any board configuration resulting from the standard
-starting setup has exactly 40 pieces in play. Because of this there is no database with solved end games for shogi.
-However, in shogi, so called mating problems \footnote{On a predesigned setup, black (lacking a king) can only make checking moves},
-which resemble end game situations, are extensively studied ~\cite{grimbergen1999survey}. There exist several
-programs that can completely solve a lot of these problems, some of which are quite large\footnote{The largest mating problem needs 1525 plies to solve}
-~\cite{seo2001pn}. Unfortunately solutions to these shogi
-mating problems are not the equivalent of solutions to western chess end games; in shogi, such a solution cannot be directly applied to find a winning move.
+starting setup has exactly 40 pieces in play. Because of this there is no database with solved endgames for shogi.
+However, in shogi, so called mating problems\footnote{On a predesigned setup, black (lacking a king) can only make checking moves},
+which resemble endgame situations, are extensively studied~\cite{grimbergen1999survey}. There exist several
+programs that can completely solve a lot of these problems, some of which are quite
+large\footnote{The largest mating problem needs 1525 plies to solve}~\cite{seo2001pn}.
+Unfortunately solutions to these shogi
+mating problems are not the equivalent of solutions to western chess endgames; such a solution cannot be directly applied to find a winning move.
 However, since the methods used to prove the shortest mating sequence are exact and not heuristical, they or similar methods might be useful to prove
 certain subsets or small variants of shogi.\\
 
 \subsection{Solving small shogi variants}
-Even though end game situations in shogi are quite complex, there are of course enough situations advanced enough -- near victory -- that they
+Even though endgame situations in shogi are quite complex, there are of course enough situations advanced enough -- near victory -- that they
 should be perfectly solvable. For instance if no move of the losing player can check the opposing king, it might be possible to restrict the search
 for the optimal move to a subset of the board. We are going to emulate this by actually looking at shogi variants played on a smaller board
 altogether.
 
 One particular method, proof-number search, has been proved to be quite effective, even outperforming $\alpha\beta$-search~\cite{van2008proof} in
-proving the game theoretical value of a game tree. This method has also been succesfully applied to shogi mating
+proving the game theoretical value of a game tree. This method has also been successfully applied to shogi mating
 problems~\cite{seo2001pn, ueda2008weak, sakuta2001performance}. We will discuss the viability of using proof-number search to solve variants of shogi and will test
 this method on small shogi variants.
 
@@ -85,25 +89,23 @@ Section \ref{sec:rep} will contain a description of a generic way to describe sm
 search, followed by a more formal definition accompanied by pseudo-code. It concludes with a description of each implemented method.
 In Section \ref{sec:results} we will describe the test domains and present the performance of each method with relevant figures.
 An interpretation of these results will be discussed in Section \ref{sec:disc}. We will conclude with suggestions to further improve
-proof-number search for use with shogi.%TODO verify this last sentence
+proof-number search for use with shogi.
 
 \section{Method}
 We are dealing with generic small sized shogi variants, so representation and algorithms employed have to be sufficiently generic as well.
-A small shogi variant is defined by the size of the board, the initial configuration of black, for white's is $180^{\circ}$ rotationally symmetrical, and
-the size of the promotion zone. The initial configuration consists of a set of pieces, each of which has one or two move sets; a normal move set and
+A small shogi variant is defined by the size of the board, the size of the promotion zone and the initial configuration of black (white's is $180^{\circ}$ rotationally symmetrical). The initial configuration consists of a set of pieces, each of which has one or two move sets; a normal move set and
 its promoted move set. An algorithm that aims to prove the game theoretical value of such a shogi variant only has to have access to two functions based on this
-definition: a move generator which can map positions to a set of successing positions, and an evaluation function which recognises terminal
+definition: a move generator which can map positions to a set of succeeding positions, and an evaluation function which recognises terminal
 positions and computes their value.
 
 \subsection{Representation}
 \label{sec:rep}
 As stated before, we have to be able to generically represent board positions. A well known technique in computer chess, bitboards, has been
-shown~\cite{grimbergen2007using} to be fairly effective in shogi as well. A bitboard is a bit pattern of at least the size of the board,
+shown~\cite{grimbergen2007using} to be effective in shogi as well. A bitboard is a bit pattern of at least the size of the board,
 in which each bit encodes some information about the corresponding square, e.g. if it is occupied.
 Figure \ref{bitsquares} shows the correspondence between squares and bits, zero being the least significant bit.
 Since the size of the bit pattern can
-easily be increased to accomodate larger boards, they are well suited for our purpose. Also, as will be explained later, they allow for easy
-generic move generation.
+easily be increased to accommodate larger boards, they are well suited for our purpose.
 
 \begin{figure}
 \center
@@ -155,7 +157,7 @@ theoretical value efficiently is only generating relevant parts of the tree.
 \subsection{Proof-number Search}
 \label{pnsearch}
 Proof-number search~\cite{allis1994proof}, or PN-search, is an algorithm designed to find the game theoretical value of a game tree, or more specifically an AND/OR tree.
-The tree consists of a root, internal nodes and leaf nodes. Each node is either an AND (white to move) or an OR node (black to move). By definition, a leaf
+The tree consists of a root, internal nodes and leaf nodes. Each node is either an AND node (white to move) or an OR node (black to move). By definition, a leaf
 node represents one player's victory and thus it has a nonzero value of $1$ (black won) or $-1$ (white won). As in the minmax algorithm, an internal
 node's value can be computed by taking the maximum or minimum of the children's value for AND and OR nodes respectively (Figure \ref{tree:simple}).
 
@@ -191,15 +193,15 @@ node's value can be computed by taking the maximum or minimum of the children's 
 % \end{figure}
 
 The most simple form of the minmax algorithm performs a depth-first expansion of the tree to calculate the value of the root. Proof-number search however
-expands the tree in a \textit{best-first} manner untill the root can be proved (i.e. determining its game theoretical value). The algorithm starts with a single
+expands the tree in a \textit{best-first} manner until the root can be proved (i.e. determining its game theoretical value). The algorithm starts with a single
 unproved node, the root. It then successively picks the most promising unproved node and expands it, i.e. generating its children. Since terminal nodes are proved
-directly upon generation, unproved nodes are never terminal and will have children once they are expanded. 
+directly upon generation, unproved nodes are never terminal and will have children nodes once they are expanded. 
 
-\subsubsection*{Most proving node}
+\paragraph{Most proving node.}
 The tree in Figure \ref{tree:pnex} has proved and unproved nodes. The nodes with a value are proved ($d$ and $g$) and the rest is unproved.
 Since the root $a$ is an OR node, it suffices
 to prove either $b$ or $c$. Both these nodes, being AND nodes, need the value of all their children before they can be proved. The sets of
-unproved children for $b$ and $c$ respectively are $\{e, f\}$ and $\{h\}$. For the root, in stead of saying that we need to prove
+unproved children for $b$ and $c$ respectively are $\{e, f\}$ and $\{h\}$. For the root, instead of saying that we need to prove
 either $b$ or $c$, we can also say we need to prove either $\{e, f\}$ or $\{h\}$. Since the latter set is smaller, it is more
 promising trying to prove $c$ than it is to prove $b$. Repeating this argument for determining the most promising branch of the tree
 eventually leads to an unproved node, $h$ in the example, which we call the \textit{most proving node}.\\
@@ -267,9 +269,9 @@ of $v$. A similar definition holds for AND nodes and disproof sets.
 The most proving node is the first unexpanded node the algorithm encounters when successively selecting the most promising branch starting from
 the root.
 
-\subsubsection*{(Dis)proof numbers}
+\paragraph{(Dis)proof numbers.}
 In the above description of the most proving node, we have seen that selecting the most promising branch differs for AND and OR nodes.
-In order to prove an AND node as fast as possible, we want to prove one of its children. OR nodes on the other hand, are more easily disproved than
+In order to prove an OR node as fast as possible, we want to prove one of its children. AND nodes on the other hand, are more easily disproved than
 proved, so we want to disprove one of its children. We also see that all unproved leaf node of the search tree -- this includes the most proving
 node -- have a smallest atomic proof and disproof set only containing itself.
 
@@ -281,7 +283,7 @@ its children. Since all the children of an AND node need to be disproved for it 
 numbers of its children. Similarly, the disproof number of an OR node equals the smallest disproof number of its children and its proof number
 is the sum of the proof numbers of its children.
 
-The last thing we need to define is what happens with proved leaf nodes (i.e. terminal positions). Since a proved leaf node has an empty atomic proof set,
+Lastly we define the proof and disproof numbers of proved leaf nodes (i.e. terminal positions). Since a proved leaf node has an empty atomic proof set,
 its proof number is zero. As this node cannot be disproved anymore, we define its disproof number to be $\infty$. For disproved leaf nodes the reverse holds
 so its disproof number is zero and proof number $\infty$. In Figure \ref{pn:def} is a summarization of the above definitions.
 \begin{figure}
@@ -324,18 +326,20 @@ so its disproof number is zero and proof number $\infty$. In Figure \ref{pn:def}
 The algorithm to select the most proving node is now very straightforward.
 
 \begin{minipage}{\textwidth}
+\vspace{4mm}
 \theoremstyle{definition}
 \newtheorem{algorithm}{Algorithm}
 \begin{algorithm}[Select most proving node ($v$)]
 \hfill\par
 \begin{tabbing}
   \textbf{while} \= $v$ is an internal node \\
-  \> \textbf{if} \= $v$ is an AND node\\
+  \> \textbf{if} \= $v$ is an OR node\\
   \> \> $v$ := leftmost child with equal proof number\\
   \> \textbf{else} \\
   \> \> $v$ := leftmost child with equal disproof number
 \end{tabbing}
 \end{algorithm}
+\vspace{4mm}
 \end{minipage}
 
 When the most proving node $v$ is reached, it is expanded and new nodes are generated. The (dis)proof number of $v$ might have
@@ -343,6 +347,7 @@ changed so all the (dis)proof numbers of the ancestors of $v$ have to be updated
 follows directly from the definitions given in Figure \ref{pn:def}.
 
 \begin{minipage}{\textwidth}
+\vspace{4mm}
 \begin{algorithm}[Update proof numbers ($v$)]
 \label{alg:update}
 \hfill\par
@@ -357,14 +362,16 @@ follows directly from the definitions given in Figure \ref{pn:def}.
   \> $v$ := $\text{parent}_v$
 \end{tabbing}
 \end{algorithm}
+\vspace{4mm}
 \end{minipage}
 
-Selecting the most proving node and updating the proof numbers are the two fundamental features of proof number search. The final step
-that we need to define the complete algorithm is the expand function. A node's children are generated by applying the move generator
+Selecting the most proving node and updating the proof numbers are the two fundamental features of proof number search. In order to
+define the complete algorithm, a definition of the expand function is also necessary. A node's children are generated by applying the move generator
 to the position stored in the node. For every new position a child node is created with the correct pointers from parent to child
 and vice versa.
 
 \begin{minipage}{\textwidth}
+\vspace{4mm}
 \begin{algorithm}[Expand ($v$)]
 \hfill\par
 \begin{tabbing}
@@ -380,12 +387,14 @@ and vice versa.
   \> \> \> $w_{pn} := \infty$ and $w_{dn} := 0$\\
 \end{tabbing}
 \end{algorithm}
+\vspace{4mm}
 \end{minipage}
 
 One iteration of the algorithm now consists of selecting the most promising node, expanding it and updating its predecessors.
-This is repeated untill either the root's proof or disproof number is equal to zero.
+This is repeated until either the root's proof or disproof number is equal to zero.
 
 \begin{minipage}{\textwidth}
+\vspace{4mm}
 \begin{algorithm}[Proof number search ($root$)]
 \hfill\par
 \begin{tabbing}
@@ -399,24 +408,26 @@ This is repeated untill either the root's proof or disproof number is equal to z
   \> \textbf{return} -1\\
 \end{tabbing}
 \end{algorithm}
+\vspace{4mm}
 \end{minipage}
 
 \subsection{Tree vs. Graph}
 \label{sec:treegraph}
 So far we have discussed trees and how to prove nodes to have either value $1$ or $-1$. However there is a third outcome to shogi, draw. Though
-very rare in full sized shogi, it can occur more often on small variants. Draw in shogi occurs if there has been a repitition
-of moves four times. Because of the drop rule \textit{any} position on the board can be repeated (repititions), moreover, different move
+very rare in full sized shogi, it can occur more often on small variants. A game of shogi is declared a draw if the same position occurs
+for the fourth time. Because of the drop rule \textit{any} position on the board can be repeated (repetitions), moreover, different move
 sequences can lead to the same position (transposition). This means that strictly adhering to the drawing rule would result in immensely large game trees,
 even for the smallest variants.
 
-A draw is a forced repitition of moves and as such it does not matter exactly how many repititions are necessary according to the rules,
-if one repitition of moves can be forced, any number is possible. If we want to detect these repititons, a history of a position is needed. In trees this
-comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. Therefor if we use an actual tree internally
-to represent the search tree, we can easily detect repititions and stop the algorithm from searching any deeper than necessary.
+A draw is a forced repetition of moves and as such it does not matter exactly how many repetitions are necessary according to the rules,
+if one repetition of moves can be forced, any number is possible. If we want to detect these repetitons, a history of a position is needed. In trees this
+comes natural as there is exactly one path from any node to the root, so reptitions are easily detected. Therefore if we use an actual tree internally
+to represent the search tree, we can easily detect repetitions and stop the algorithm from searching any deeper than necessary.
 
 To evaluate games that can possibly draw, we simply run PN-search twice; the first time repeated positions are a loss for black and the second time for white.
-The game is a draw if both runs show that the player who loses on draws also loses the game. Or equivalently, if a player has a winning strategy
-even if he loses in potential drawing situations, then that strategy will work regardless of drawing situations.\\
+The game is a draw if both players have a winning strategy if
+and only if they win in drawing situations. Since the only 'winning' nodes are in fact repeated positions in these strategies, both players can always
+force the game to a repeated position.
 
 \begin{figure}[h]
 \center
@@ -425,7 +436,7 @@ even if he loses in potential drawing situations, then that strategy will work r
 \label{treevsgraph}
 \end{figure}
 
-Above mentioned method solves the problem of repititions, but not transpositions. This second type of duplicate positions in the game tree
+Above mentioned method solves the problem of repetitions, but not transpositions. This second type of duplicate positions in the game tree
 can still cause it to become very large. Figure \ref{treevsgraph} shows an example of a transposition. The so called \emph{join node} $d$ is
 reachable via $b$ as well as $c$. The tree representation containing this transposition shows that $d$ and all its children occur multiple times.
 If a node has join nodes amongst its ancestors in the DAG, it will
@@ -442,33 +453,34 @@ on cyclic graphs it has to be adapted and can still give incorrect results ~\cit
 To test and compare the applicability of proof number search on small variants of shogi, taking into account the considerations on graphs and trees,
 three algorithms were implemented. Most importantly are two variants of proof number search. These are proof number search with the search tree
 represented as a tree and proof number-number search with the search tree represented as a graph.
-To relativate the results of these two algorithms, a simple breadth first search is also implemented.
+To compare the results of these two algorithms, a simple breadth first search is also implemented.
 
-\paragraph{Proof-number search: tree.} This algorithm is exactly as explained in  as explained in Section \ref{pnsearch}. Draw is detected by running
+\paragraph{Proof-number search: tree.} This algorithm is exactly as explained in Section \ref{pnsearch}. Draw is detected by running
 the algorithm twice; in the first run black loses in drawing situations and in the second run white loses in those situations.
 
 \paragraph{Proof-number search: graph.} In this variant the search tree is represented as a graph. The algorithm is the same except for the updating
-procedure given in Algorithm \ref{alg:update}. In stead of only updating one parent, all parents have to be updated. Therefor, after expanding a
+procedure given in Algorithm \ref{alg:update}. Instead of only updating one parent, all parents have to be updated. Therefore, after expanding a
 node $v$, all simple paths from $v$ to the root are updated. As trees are a special case of graphs, this is actually what also happens in the original
-algorithm. Draw is detected if the complete search tree is expanded and the game has not been proved.
+algorithm. As explained in Section \ref{sec:treegraph}, draw is detected if the complete search tree is expanded and the game has not been proved.
 
 \paragraph{Breadth-first search.} As the name suggests, a simple breadth-first expansion of the search tree using the minimax method of determining
-the game theoretical value of nodes. For this algorithm we also use a graph representation. Simalar to the proof-number search variant, it
+the game theoretical value of nodes. For this algorithm we also use a graph representation. Similar to the proof-number search variant, it
 updates all simple paths from the last expanded node $v$ to the root. It also detects draw by exhausting the search tree.
 
 \section{Results}
 \label{sec:results}
 %Compare results of the three algorithms (BFS, PN on graph, PN on tree) and explain the differences.\\
 %subsection: Point out where and why PN fails where BFS succeeds.
-The first series of tests were performed on a $3 \times 3$ board with up to four pieces per player, always including exactly one king. To compensate
+The first series of tests were performed on a $3 \times 3$ board with up to four pieces per player, always including exactly one king
+per player. To compensate
 for the small board, both the rook and the bishop can only move one square in their usual directions and they can not promote. Each player
 has four possible starting squares for their pieces as shown in Figure \ref{3x3setup}.
 Eight different piece types led to an enumeration of 1372 different starting positions.
 See Appendix \ref{3x3rules} for a detailed description of the rules for the $3 \times 3$-variants.
 
 There are bound to be trivial games amongst the 1372 different starting positions. For instance, the king might be in check at the start, so since
-the game is symmetrical the starting player will win. To filter out these situations we will only look at the games which needed an
-average of 30 expanded nodes per algorithm to prove the value of the root. After filtering out the trivial games, 513 remain. Of these, 311 result
+the game is symmetrical the starting player will win. To filter out these situations we will only look at the games which needed at least
+30 expanded nodes per algorithm to prove the value of the root. After filtering out the trivial games, 513 remain. Of these, 311 result
 in a win for black, 180 in a win for white and 22 games which result in a draw. Table \ref{table:3x3result} shows some results from running the three
 algorithms.
 
@@ -502,17 +514,18 @@ node as most proving, which resulted in a loop.
 \paragraph{Animal shogi.} The second series of test were performed on a commercial variant of shogi designed for children. It is played on a $3 \times 4$
 board with a king, rook, bishop and pawn for each player.
 The game is similar to the smaller $3 \times 3$ variant with the additional rule that reaching the promotion zone with your king wins you the game.
-The full set of rules is explained in Appendix \ref{dobutsu}. This variant has been strongly solved
+The full set of rules is explained in Appendix \ref{dobutsu}. This variant has been strongly solved by retrograde analysis
 \cite{tetsuroanimal}, so it is a good test subject. The game has $\pm1.5$ billion reachable positions, which means that the game tree represented as a graph has exactly
 this amount of nodes. It has been shown that white has a winning strategy. The longest game in which black
 delays loss as long as possible and white tries to win as fast as possible has 78 plies; 39 moves per player. 
 
 We will use the complete Animal shogi setup, as well as all variations where some pieces are missing (except the king). In all starting positions, black and white have the
 same pieces missing. In Table \ref{animalresult} are the results of running PN-search with the tree representation on all the variations. The column with collisions shows that
-in all but the simplest game a lot of positions are expanded more than once. In the game without pawn and bishop, the algorithm only expanded $19\,996$ unique positions
-when it needed more than $4$ million to prove the root.
+in all but the simplest game a lot of positions are expanded more than once. In the game without pawn and bishop, the algorithm needed more than $4$ million
+nodes to prove the root. However, $99.52\%$ of these were collisions; meaning that only $19\,996$ unique positions were generated.
 
-In the unproved games, the proof and disproof numbers were always strictly increasing in intervals of thousand iterations. In the $3 \times 3$ variants,
+PN-search was unable to prove the full game, as well as every variation with only one piece missing.
+In these unproved games, the proof and disproof numbers were always strictly increasing in intervals of thousand iterations. In the $3 \times 3$ variants,
 the algorithm would quickly proof the root once both proof and disproof numbers started to decline. \\
 
 \begin{table}
@@ -538,24 +551,42 @@ but the one it solved. PN-search with a graph representation would quickly loop 
 
 \section{Discussion}
 \label{sec:disc}
+In this paper, PN-search was used to determine the game theoretical value of small variants of shogi. By doing so, the viability of this algorithm
+in the domain of shogi was tested. The test results show that there are several issues with applying PN-search to this domain.
 
-Even though PN-search was succesfully used to solve mating problems, even very large ones, the implementation as presented here did not show promising results. As the implementation
-was not optimised for efficient memory usage, we did not expect to solve much more than small sized variants. However, the results from Animal shogi show that there are more -- maybe
-more important -- ways than mere code optimisation to save memory.
+First there is the issue of shogi's large game tree. Even though PN-search looked promising on $3 \times 3$ variants, only three extra
+squares on the board was enough to make the game tree explode. The major reason for this is the drop rule; three extra squares means three
+extra moves for every piece in hand. Additionally, on a larger board pieces have more freedom, especially the king. On a $3 \times 3$ board
+the king is very limited in its movement; for instance, it can never move to the centre square. As we have seen, the large size of the game
+tree is mainly due to transpositions. As it is very common in full sized shogi to have transpositions, this is an issue that is to be addressed
+by any computer shogi program.
 
-%TODO fix this
+A proposed solution to this problem was representing the game tree as a graph. However, this introduced such difficulties for PN-search, that it
+was unable to solve a significant part of the test cases.
 One of the reasons PN-search fails on graphs is when the most proving node is not an unexpanded node. This happens when a node is part of a cycle
 and the only node left to complete its proof is itself. If such a node is selected, it will be selected in the next round as well, resulting
 in an infinite loop. As stated in Section \ref{sec:treegraph}, an adaptation of the PN-search algorithm has been proposed that (amongst others)
-solves this problem. However even that improved version of PN-search on cyclic graphs disfunctions in certain situations.
+solves this problem. However even that improved version of PN-search on cyclic graphs can still fail to prove the game in certain situations.
+PN-search does work well on directed acyclic graph, which is one of the reasons why it performs so well on shogi mating problems. Since these problems
+are designed to have one unique solution, i.e. a sequence of checking moves from black leading to a checkmate, cycles don't occur in the
+game tree. Therefore, representing the game tree as a graph will yield a DAG. A more import reason why mating problems are more easily solved
+by PN-search is the lower branching factor of the game tree; being only allowed to make checking moves is obviously very limiting.
 
+PN-search is a generic algorithm that works with any AND/OR tree, and as such it uses no domain specific knowledge.
+It does however offer an interesting way to incorporate some domain specific
+knowledge without altering the algorithm. In our implementation we always assign proof and disproof number 1 to an unexpanded node. Changing
+these values depending on the kind of move might improve the search. For instance, giving a checking move lower proof numbers than other moves
+will have the effect that those moves are searched first.\\
 
-\begin{itemize}
-	\item Even very small instances of shogi are quite complex, give figures on number of nodes in proven drawn games.
-	\item PN search not really fitted for non-destructive games
-	\item Are there other viable methods for proving small games? How do they differ from PN search? Reduce nodes by domination simulation, then retrograde analysis.
-\end{itemize}
+Further research is necessary to determine whether a more solid PN-search variant working with graphs can be applied to small variants of shogi.
+Adding domain specific knowledge to the algorithm might also further improve the performance. Even though small variants are solvable by
+retrograde analysis, this kind of backwards search is of no use in competitive programs. A good forward searching method is vital for
+finding good heuristic values in limited amount of time~\cite{iida2002computer}.
 
+\bibliography{cites}{}
+\bibliographystyle{plain}
+
+\newpage
 {\appendix
 \section{Shogi on a $3 \times 3$ board.}
 \label{3x3rules}
@@ -570,7 +601,7 @@ Figure \ref{startingpos}.
 \label{startingpos}
 \end{figure}
 
-\paragraph{Winning condition.} A player wins if the enemy king is captured. This usually means that both players try to checkmate the enemy's king, however an
+\paragraph{Winning condition.} A player wins if the opponent's king is captured. This usually means that both players try to checkmate the opponent's king, however an
 inattentive player might accidentally make a move which leaves his king in check.
 
 \paragraph{Promotion.}  A player's promotion zone is the furthest rank opposed to its pieces starting location. 
@@ -578,22 +609,22 @@ If a player moves a piece to, from or in the promotion zone he may chose to prom
 (e.g. a pawn moving to the last rank) then it has to be promoted. A piece loses its current move set and gains the promoted move set upon promotion. A promoted piece can never
 promote.
 
-\paragraph{Drop rule.} If a player captures a piece of the enemy, he takes the captured piece in its hand. In one of its subsequent turns, in stead of moving one of his
+\paragraph{Drop rule.} If a player captures a piece of the opponent, he takes the captured piece in its hand. In one of its subsequent turns, instead of moving one of his
 pieces on the board, he might choose to place one of the pieces in his hand on the board. He can only place pieces on vacant squares. It is not allowed to place a piece
 on the board such that it has no more legal moves, e.g. placing a pawn on the last rank is forbidden. If a piece is dropped in the promotion zone, it is \emph{not} promoted.
 If that piece is moved in a subsequent turn however, normal promotion rules apply.
 
-\paragraph{Pieces.} There are eight different pieces, each with a unique move set. Some pieces can promote while others can not. All pieces can capture enemy pieces with their normal movement
+\paragraph{Pieces.} There are eight different pieces, each with a unique move set. Some pieces can promote while others can not. All pieces can capture opposing pieces with their normal movement
 (unlike pawns in western chess).\\
-\begin{tabular}{l l}
+\begin{tabularx}{\textwidth}{l X}
 \textbf{King} & The same as in chess, one step in all directions.\\
 \textbf{Bishop} & Normally the same as in chess, but here restricted to only one step diagonally.\\
 \textbf{Rook} & Normally same as in chess, but here restricted to only one step orthogonally.\\
-\textbf{Gold} General & One step in all directiones, except diagonally backwards.\\
-\textbf{Silver} General & One step in all directions, except orthogonally backwards and sidewards.\\
+\textbf{Gold General} & One step in all directions, except diagonally backwards.\\
+\textbf{Silver General} & One step in all directions, except orthogonally backwards and sidewards.\\
 \textbf{Knight} & Can move one step forwards plus one step diagonally forwards in one turn, possibly jumping over other pieces.\\
 \textbf{Pawn} & One step forwards.\\
-\end{tabular}
+\end{tabularx}
 The Silver General, Knight and Pawn can promote. Their promoted move set is the same as the Gold General's.
 
 \section{Animal shogi}
@@ -609,17 +640,17 @@ The Silver General, Knight and Pawn can promote. Their promoted move set is the 
 \label{dobutsusetup}
 \end{figure}
 
-\paragraph{Winning condition.} A player wins if the enemy king is captured. Additionally, if a player moves his king to a square in the promotion zone
-which is not under attack, that player wins. A square is under attack if the enemy can move one of its pieces there (excluding drops).
+\paragraph{Winning condition.} A player wins if the opponent's king is captured. Additionally, if a player moves his king to a square in the promotion zone
+which is not under attack, that player wins. A square is under attack if the opponent can move one of its pieces there (excluding drops).
 
 \paragraph{Promotion.}  A player's promotion zone is the furthest rank opposed to its pieces starting location. If a player moves a pawn to the promotion zone it will
 always promote. Other pieces can not promote in this variant.
 
-\paragraph{Drop rule.} If a player captures a piece of the enemy, he takes the captured piece in its hand. In one of its subsequent turns, in stead of moving one of his
+\paragraph{Drop rule.} If a player captures a piece of the opponent, he takes the captured piece in its hand. In one of its subsequent turns, instead of moving one of his
 pieces on the board, he might choose to place one of the pieces in his hand on the board. He can only place pieces on vacant squares. It is not allowed to place a pawn
 in the promotion zone, as it will not promote and have no legal moves left.
 
-\paragraph{Pieces.} There are four different pieces, each with a unique move set. Only the pawn can promote. All pieces can capture enemy pieces with their normal movement
+\paragraph{Pieces.} There are four different pieces, each with a unique move set. Only the pawn can promote. All pieces can capture opposing pieces with their normal movement
 (unlike pawns in western chess).\\
 \begin{tabular}{l l}
 \textbf{King} & The same as in chess, one step in all directions.\\
@@ -630,7 +661,5 @@ in the promotion zone, as it will not promote and have no legal moves left.
 \end{tabular}
 
 }
-\bibliography{cites}{}
-\bibliographystyle{plain}
 
 \end{document}

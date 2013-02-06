@@ -5,6 +5,9 @@ using System.Linq;
 
 namespace smallshogi
 {
+	/// <summary>
+	/// Deprecated class for reading writing data, should not be used
+	/// </summary>
 	public class DataReader
 	{
 		string dirpath;
